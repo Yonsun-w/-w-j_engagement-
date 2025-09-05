@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W & J 的爱情故事</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Playfair+Display:wght@300;400;600&family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 背景自定义面板 -->
+    <div class="background-panel" id="backgroundPanel">
+        <div class="panel-header">
+            <h3>自定义背景</h3>
+            <button class="panel-close" id="panelClose">&times;</button>
+        </div>
+        <div class="background-options">
+            <div class="bg-option" data-bg="gradient1">
+                <div class="bg-preview gradient1"></div>
+                <span>浪漫渐变</span>
+            </div>
+            <div class="bg-option" data-bg="gradient2">
+                <div class="bg-preview gradient2"></div>
+                <span>温馨粉色</span>
+            </div>
+            <div class="bg-option" data-bg="gradient3">
+                <div class="bg-preview gradient3"></div>
+                <span>天空蓝</span>
+            </div>
+            <div class="bg-option" data-bg="floral">
+                <div class="bg-preview floral"></div>
+                <span>花卉图案</span>
+            </div>
+            <div class="upload-section">
+                <label for="bgUpload" class="upload-label">
+                    <i class="fas fa-upload"></i>
+                    上传自定义背景
+                </label>
+                <input type="file" id="bgUpload" accept="image/*">
+            </div>
+        </div>
+    </div>
+
+    <!-- 地图配置面板 -->
+    <div class="map-config-panel" id="mapConfigPanel">
+        <div class="panel-header">
+            <h3>地图配置</h3>
+            <button class="panel-close" id="mapPanelClose">&times;</button>
+        </div>
+        <div class="map-config-content">
+            <div class="config-section">
+                <h4>当前设置</h4>
+                <div class="current-location" id="currentLocation">
+                    <p><strong>经度：</strong><span id="currentLng">116.397470</span></p>
+                    <p><strong>纬度：</strong><span id="currentLat">39.908823</span></p>
+                    <p><strong>地点：</strong><span id="currentTitle">聚会地点</span></p>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h4>修改坐标</h4>
+                <div class="input-group">
+                    <label for="newLat">纬度：</label>
+                    <input type="number" id="newLat" step="0.000001" placeholder="例如：39.908823">
+                </div>
+                <div class="input-group">
+                    <label for="newLng">经度：</label>
+                    <input type="number" id="newLng" step="0.000001" placeholder="例如：116.397470">
+                </div>
+                <div class="input-group">
+                    <label for="newTitle">地点名称：</label>
+                    <input type="text" id="newTitle" placeholder="例如：家庭聚会地点">
+                </div>
+                <div class="input-group">
+                    <label for="newAddress">地址描述：</label>
+                    <input type="text" id="newAddress" placeholder="例如：温馨的家中环境">
+                </div>
+                <div class="config-buttons">
+                    <button class="config-btn update-btn" id="updateMapConfig">
+                        <i class="fas fa-save"></i> 更新坐标
+                    </button>
+                    <button class="config-btn location-btn" id="getCurrentLocationBtn">
+                        <i class="fas fa-crosshairs"></i> 获取当前位置
+                    </button>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h4>快速设置</h4>
+                <div class="preset-locations">
+                    <button class="preset-btn" data-lat="39.908823" data-lng="116.397470" data-title="天安门广场" data-address="北京市东城区">北京天安门</button>
+                    <button class="preset-btn" data-lat="31.230416" data-lng="121.473701" data-title="东方明珠" data-address="上海市浦东新区">上海东方明珠</button>
+                    <button class="preset-btn" data-lat="22.543099" data-lng="114.057868" data-title="深圳市民中心" data-address="深圳市福田区">深圳市民中心</button>
+                </div>
+                <p class="config-help">
+                    <i class="fas fa-info-circle"></i>
+                    点击“查看地图”按钮将优先尝试打开百度地图APP，如果没有安装则会自动跳转到网页版。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">W & J</div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#hero" class="nav-link">首页</a></li>
+                <li><a href="#couple" class="nav-link">新人</a></li>
+                <li><a href="#details" class="nav-link">详情</a></li>
+                <li><a href="#story" class="nav-link">我们的故事</a></li>
+                <li><button class="bg-toggle" id="bgToggle"><i class="fas fa-palette"></i></button></li>
+                <li><button class="map-config-toggle" id="mapConfigToggle" title="地图配置"><i class="fas fa-map-marker-alt"></i></button></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主页面 -->
+    <main class="main-content">
+        <!-- Hero 区域 -->
+        <section id="hero" class="hero">
+            <div class="hero-content">
+                <div class="hero-text" data-aos="fade-up">
+                    <h1 class="hero-title">
+                        <span class="letter">W</span>
+                        <span class="hero-heart">&</span>
+                        <span class="letter">J</span>
+                    </h1>
+                    <p class="hero-subtitle">与最亲爱的家人分享我们的幸福时刻</p>
+                    <div class="hero-date">
+                        <div class="date-line"></div>
+                        <span class="date-text">2025年10月3日</span>
+                        <div class="date-line"></div>
+                    </div>
+                </div>
+                <div class="scroll-indicator">
+                    <div class="scroll-arrow"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 新人介绍 -->
+        <section id="couple" class="couple-section">
+            <div class="container">
+                <div class="section-header" data-aos="fade-up">
+                    <h2 class="section-title">新人介绍</h2>
+                    <div class="section-divider">
+                        <div class="divider-line"></div>
+                        <i class="fas fa-heart divider-icon"></i>
+                        <div class="divider-line"></div>
+                    </div>
+                </div>
+                
+                <div class="couple-cards">
+                    <div class="couple-card bride-card" data-aos="fade-right">
+                        <div class="card-inner">
+                            <div class="card-front">
+                                <div class="photo-frame">
+                                    <div class="photo-display bride-photo">
+                                        <i class="fas fa-female"></i>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h3 class="name">W</h3>
+                                    <p class="role">温柔女孩</p>
+                                    <div class="social-icons">
+                                        <i class="fab fa-instagram"></i>
+                                        <i class="fab fa-facebook"></i>
+                                        <i class="fab fa-twitter"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="couple-heart" data-aos="zoom-in" data-aos-delay="200">
+                        <i class="fas fa-heart"></i>
+                    </div>
+
+                    <div class="couple-card groom-card" data-aos="fade-left" data-aos-delay="100">
+                        <div class="card-inner">
+                            <div class="card-front">
+                                <div class="photo-frame">
+                                    <div class="photo-display groom-photo">
+                                        <i class="fas fa-male"></i>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h3 class="name">J</h3>
+                                    <p class="role">阳光男孩</p>
+                                    <div class="social-icons">
+                                        <i class="fab fa-instagram"></i>
+                                        <i class="fab fa-facebook"></i>
+                                        <i class="fab fa-twitter"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 订婚详情 -->
+        <section id="details" class="details-section">
+            <div class="container">
+                <div class="section-header" data-aos="fade-up">
+                    <h2 class="section-title">聚会详情</h2>
+                    <div class="section-divider">
+                        <div class="divider-line"></div>
+                        <i class="fas fa-rings-wedding divider-icon"></i>
+                        <div class="divider-line"></div>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="detail-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="detail-content">
+                            <h3>时间</h3>
+                            <p class="detail-main">2025年10月3日</p>
+                            <p class="detail-sub">星期五 · 中午11:00</p>
+                            <p class="detail-meaning">💫 金星日，象征爱情和美好关系</p>
+                            <div class="countdown" id="countdown">
+                                <div class="countdown-item">
+                                    <span class="countdown-number" id="days">00</span>
+                                    <span class="countdown-label">天</span>
+                                </div>
+                                <div class="countdown-item">
+                                    <span class="countdown-number" id="hours">00</span>
+                                    <span class="countdown-label">时</span>
+                                </div>
+                                <div class="countdown-item">
+                                    <span class="countdown-number" id="minutes">00</span>
+                                    <span class="countdown-label">分</span>
+                                </div>
+                                <div class="countdown-item">
+                                    <span class="countdown-number" id="seconds">00</span>
+                                    <span class="countdown-label">秒</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="detail-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="detail-content">
+                            <h3>地点</h3>
+                            <p class="detail-main">温馨家庭聚会</p>
+                            <p class="detail-sub">家人围坐 · 亲密分享</p>
+                            <p class="detail-address">地址：温馨的家中环境</p>
+                            <button class="map-btn" id="mapBtn">
+                                <i class="fas fa-directions"></i>
+                                查看地图
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="detail-card" data-aos="fade-up" data-aos-delay="300">
+                        <div class="detail-icon">
+                            <i class="fas fa-glass-cheers"></i>
+                        </div>
+                        <div class="detail-content">
+                            <h3>聚会安排</h3>
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-time">11:00</div>
+                                    <div class="timeline-content">家人集合</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-time">11:30</div>
+                                    <div class="timeline-content">爱情分享</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-time">12:00</div>
+                                    <div class="timeline-content">家庭午餐</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-time">14:00</div>
+                                    <div class="timeline-content">温馨时光</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 我们的故事 -->
+        <section id="story" class="story-section">
+            <div class="container">
+                <div class="section-header" data-aos="fade-up">
+                    <h2 class="section-title">我们的故事</h2>
+                    <div class="section-divider">
+                        <div class="divider-line"></div>
+                        <i class="fas fa-book-heart divider-icon"></i>
+                        <div class="divider-line"></div>
+                    </div>
+                </div>
+
+                <div class="story-timeline">
+                    <div class="story-item" data-aos="fade-right">
+                        <div class="story-date">2022年春天</div>
+                        <div class="story-content">
+                            <h3>初次相遇</h3>
+                            <p>那是一个阳光明媚的春日午后，我们在咖啡店里偶然相遇。你的笑容如春日暖阳，瞬间点亮了我的世界。从那一刻起，我就知道，你就是我一直在寻找的那个人。</p>
+                        </div>
+                        <div class="story-icon">
+                            <i class="fas fa-coffee"></i>
+                        </div>
+                    </div>
+
+                    <div class="story-item" data-aos="fade-left">
+                        <div class="story-date">2022年夏天</div>
+                        <div class="story-content">
+                            <h3>热恋时光</h3>
+                            <p>夏日的夜晚，我们一起漫步在海边，聆听着海浪的声音。你的手轻轻握在我的手中，那一刻，时间仿佛静止了。我们分享着彼此的梦想，计划着美好的未来。</p>
+                        </div>
+                        <div class="story-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                    </div>
+
+                    <div class="story-item" data-aos="fade-right">
+                        <div class="story-date">2023年秋天</div>
+                        <div class="story-content">
+                            <h3>深情告白</h3>
+                            <p>金桂飘香的秋日，在那棵梧桐树下，我鼓起勇气向你表达了我的爱意。当你含羞地点头答应的那一刻，我的心中充满了无法言喻的喜悦。从此，我们的爱情之花正式绽放。</p>
+                        </div>
+                        <div class="story-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                    </div>
+
+                    <div class="story-item" data-aos="fade-left">
+                        <div class="story-date">2024年冬天</div>
+                        <div class="story-content">
+                            <h3>求婚时刻</h3>
+                            <p>雪花纷飞的冬日夜晚，我在你最喜欢的那家餐厅里，单膝跪地，向你递上了承载着我满满爱意的戒指。当你泪流满面地说出"我愿意"时，我知道，我是世界上最幸福的人。</p>
+                        </div>
+                        <div class="story-icon">
+                            <i class="fas fa-ring"></i>
+                        </div>
+                    </div>
+
+                    <div class="story-item current" data-aos="zoom-in">
+                        <div class="story-date">2025年秋天</div>
+                        <div class="story-content">
+                            <h3>家人聚首</h3>
+                            <p>在这个收获的季节，我们选择在金星日这个象征爱情的美好日子，与最亲爱的双方父母分享我们的幸福。这是我们爱情故事的新章节，也是两个家庭融合的美好开始。</p>
+                        </div>
+                        <div class="story-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="story-quote" data-aos="fade-up">
+                    <blockquote>
+                        "爱情不是寻找一个完美的人，而是用完美的眼光去欣赏一个不完美的人。"
+                    </blockquote>
+                    <cite>— W & J</cite>
+                </div>
+            </div>
+        </section>
+
+        <!-- 祝福留言 -->
+        <section class="wishes-section">
+            <div class="container">
+                <div class="section-header" data-aos="fade-up">
+                    <h2 class="section-title">家人祝福</h2>
+                    <div class="section-divider">
+                        <div class="divider-line"></div>
+                        <i class="fas fa-comment-heart divider-icon"></i>
+                        <div class="divider-line"></div>
+                    </div>
+                </div>
+
+                <div class="wishes-container">
+                    <div class="wish-form" data-aos="fade-up">
+                        <textarea id="wishText" placeholder="写下对新人的美好祝愿..."></textarea>
+                        <div class="form-footer">
+                            <input type="text" id="wishName" placeholder="家人姓名">
+                            <button id="submitWish" class="submit-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                留下祝愿
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="wishes-list" id="wishesList">
+                        <!-- 家人祝福将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-heart">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <p>感谢家人们的爱与祝福</p>
+                <p class="footer-date">W & J · 2025年10月3日</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 粒子效果容器 -->
+    <div class="particles-container" id="particles"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
