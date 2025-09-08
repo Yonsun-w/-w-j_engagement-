@@ -1787,6 +1787,28 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     body {
         overflow-x: hidden;
     }
+    
+    /* iOS刘海屏和安全区域适配 */
+    .navbar {
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    .fullscreen-container {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    /* 确保文字可读性 */
+    h1, h2, h3, h4, h5, h6, p {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* 移动端触摸优化 */
+    button, .btn, .map-btn, .call-btn {
+        min-height: 44px;
+        min-width: 44px;
+        touch-action: manipulation;
+    }
 }
 
 .footer-heart {
