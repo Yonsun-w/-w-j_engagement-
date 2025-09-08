@@ -158,11 +158,13 @@ body {
     box-shadow: var(--shadow);
     z-index: 999;
     transition: var(--transition);
+    border-bottom: 1px solid rgba(255, 107, 157, 0.1);
 }
 
 .navbar.scrolled {
     background: rgba(255, 255, 255, 0.98);
     box-shadow: var(--shadow-hover);
+    border-bottom: 1px solid rgba(255, 107, 157, 0.2);
 }
 
 .nav-container {
@@ -522,7 +524,12 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
 }
 
 .restaurant-info {
-    padding: 20px 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 107, 157, 0.2);
 }
 
 .restaurant-header {
@@ -808,15 +815,76 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     .gallery-item img {
         height: 150px;
     }
+    
+    /* 移动端增强毛玻璃效果 */
+    .restaurant-info,
+    .countdown-section,
+    .story-quote {
+        backdrop-filter: blur(15px);
+        background: rgba(255, 255, 255, 0.92);
+    }
+    
+    /* 修复移动端居中问题 */
+    .section-header {
+        text-align: center;
+        width: 100%;
+        padding: 0 20px;
+    }
+    
+    .hero-content {
+        text-align: center;
+        padding: 0 20px;
+    }
+    
+    .restaurant-hero {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 0 20px;
+    }
+    
+    .restaurant-info {
+        margin: 0 20px;
+        text-align: center;
+    }
+    
+    .story-container {
+        padding: 0 20px;
+    }
+    
+    .wishes-intro {
+        text-align: center;
+        padding: 0 20px;
+    }
+    
+    .wish-form {
+        margin: 0 20px;
+    }
+    
+    /* 确保内容不超出屏幕 */
+    .container {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* 按钮居中 */
+    .map-btn, .call-btn, .btn {
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+        display: block;
+    }
 }
 
 .countdown-section {
-    background: var(--gradient-primary);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     padding: 30px;
     border-radius: 20px;
     text-align: center;
-    color: var(--white);
+    color: var(--text-dark);
     margin-top: 20px;
+    border: 1px solid rgba(255, 107, 157, 0.2);
+    box-shadow: 0 10px 30px rgba(255, 107, 157, 0.1);
 }
 
 .countdown-section h3 {
@@ -1146,12 +1214,14 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
 
 .story-content {
     flex: 1;
-    background: var(--white);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     padding: 30px;
     border-radius: 15px;
     box-shadow: var(--shadow);
     margin: 0 40px;
     position: relative;
+    border: 1px solid rgba(255, 107, 157, 0.15);
 }
 
 .story-content::before {
@@ -1190,16 +1260,17 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
 
 /* 准备提示样式 */
 .preparation-tip {
-    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    background: linear-gradient(135deg, rgba(255, 192, 203, 0.2) 0%, rgba(255, 107, 157, 0.15) 100%);
     border-left: 4px solid var(--primary-color);
     padding: 12px 16px;
     margin-top: 15px;
     border-radius: 8px;
     font-size: 0.9rem;
-    color: #856404;
+    color: var(--text-dark);
     box-shadow: 0 2px 8px rgba(255, 107, 157, 0.1);
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(5px);
 }
 
 .preparation-tip::before {
@@ -1618,6 +1689,8 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     /* 移动端内容适配 */
     .restaurant-hero {
         height: auto;
+        text-align: center;
+        padding: 0 20px;
         min-height: 70vh;
         align-items: flex-start;
         padding-top: 20px;
@@ -1641,6 +1714,78 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     .wishes-container {
         max-height: 70vh;
         overflow-y: auto;
+    }
+    
+    /* 移动端文字和元素居中 */
+    .section-title {
+        text-align: center;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+    }
+    
+    .section-subtitle {
+        text-align: center;
+        font-size: 1.1rem;
+    }
+    
+    .hero-title {
+        font-size: clamp(2rem, 6vw, 3rem);
+        text-align: center;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    /* 移动端按钮和操作区域 */
+    .restaurant-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+        padding: 0 20px;
+    }
+    
+    .restaurant-contact {
+        text-align: center;
+        padding: 0 20px;
+    }
+    
+    /* 移动端倒计时优化 */
+    .countdown-section {
+        margin: 0 20px;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .countdown-section h3 {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    /* 移动端按钮样式统一 */
+    .map-btn, 
+    .call-btn, 
+    .btn {
+        width: 100%;
+        max-width: 280px;
+        margin: 10px auto;
+        display: block;
+        text-align: center;
+    }
+    
+    /* 移动端确保内容不溢出 */
+    .container {
+        max-width: 100%;
+        overflow-x: hidden;
+        padding: 0 15px;
+    }
+    
+    body {
+        overflow-x: hidden;
     }
 }
 
