@@ -1,21 +1,414 @@
 // 等待DOM加载完成
 document.addEventListener('DOMContentLoaded', function() {
     // 初始化所有功能
+    initSmartScroll(); // 智能滚动功能
     initNavbar();
-    initBackgroundPanel();
     initCountdown();
     initPhotoDisplay();
     initWishes();
     initParticles();
+    initPetals(); // 花瓣效果
     initScrollAnimations();
-    initSmoothScroll();
+    initStoryAutoScroll(); // 故事自动滚动
+    initDanmaku(); // 弹幕功能
     initMapFunction();
-    initMapConfigPanel();
-    loadMapConfig();
+    initPhoneCall();
     
     // 添加加载动画
     document.body.classList.add('loaded');
 });
+
+// 智能滚动配置
+let currentPage = 0;
+let isPageTransitioning = false;
+let scrollTimeout;
+
+const pages = [
+    { id: 'hero', name: '首页' },
+    { id: 'restaurant-section', name: '聚会地点' }, 
+    { id: 'story', name: '故事' },
+    { id: 'wishes-section', name: '祝福' }
+];
+
+// 初始化智能滚动功能
+function initSmartScroll() {
+    const container = document.getElementById('fullscreenContainer');
+    if (!container) return;
+
+    // 使用 Intersection Observer 来检测当前可见的页面
+    const observerOptions = {
+        root: container,
+        rootMargin: '-20% 0px -20% 0px',
+        threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const pageId = entry.target.id;
+                const pageIndex = pages.findIndex(page => page.id === pageId);
+                if (pageIndex !== -1 && pageIndex !== currentPage) {
+                    currentPage = pageIndex;
+                    updatePageIndicators();
+                    triggerPageChangeEvent(currentPage, pageIndex);
+                }
+            }
+        });
+    }, observerOptions);
+
+    // 观察所有页面
+    pages.forEach(page => {
+        const element = document.getElementById(page.id);
+        if (element) {
+            observer.observe(element);
+        }
+    });
+    
+    // 初始化页面指示器
+    initPageIndicators();
+    
+    // 监听容器滚动，更新进度
+    let scrollTimer;
+    container.addEventListener('scroll', () => {
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+            updateScrollProgress();
+        }, 10);
+    });
+    
+    // 键盘导航
+    document.addEventListener('keydown', handleKeyboardNavigation);
+}
+
+// 处理键盘导航
+function handleKeyboardNavigation(e) {
+    if (isPageTransitioning) return;
+    
+    switch(e.key) {
+        case 'ArrowDown':
+        case 'PageDown':
+            e.preventDefault();
+            navigateToPage(Math.min(currentPage + 1, pages.length - 1));
+            break;
+        case 'ArrowUp':
+        case 'PageUp':
+            e.preventDefault();
+            navigateToPage(Math.max(currentPage - 1, 0));
+            break;
+        case 'Home':
+            e.preventDefault();
+            navigateToPage(0);
+            break;
+        case 'End':
+            e.preventDefault();
+            navigateToPage(pages.length - 1);
+            break;
+    }
+}
+
+// 导航到指定页面
+function navigateToPage(pageIndex) {
+    if (pageIndex < 0 || pageIndex >= pages.length || pageIndex === currentPage) return;
+    
+    isPageTransitioning = true;
+    const targetElement = document.getElementById(pages[pageIndex].id);
+    const container = document.getElementById('fullscreenContainer');
+    
+    if (targetElement && container) {
+        targetElement.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+        
+        // 延迟解锁
+        setTimeout(() => {
+            isPageTransitioning = false;
+        }, 1000);
+    }
+}
+
+// 更新滚动进度
+function updateScrollProgress() {
+    const container = document.getElementById('fullscreenContainer');
+    if (!container) return;
+    
+    const scrollTop = container.scrollTop;
+    const scrollHeight = container.scrollHeight - container.clientHeight;
+    const progress = (scrollTop / scrollHeight) * 100;
+    
+    // 这里可以用于更新某些进度指示器
+}
+
+// 初始化页面指示器
+function initPageIndicators() {
+    const indicators = document.getElementById('pageIndicators');
+    if (!indicators) return;
+    
+    // 清空现有指示器
+    indicators.innerHTML = '';
+    
+    // 创建新的指示器
+    pages.forEach((page, index) => {
+        const indicator = document.createElement('div');
+        indicator.className = 'page-indicator';
+        indicator.setAttribute('data-page', index);
+        indicator.setAttribute('data-label', page.name);
+        
+        if (index === 0) indicator.classList.add('active');
+        
+        // 点击指示器跳转页面
+        indicator.addEventListener('click', () => {
+            navigateToPage(index);
+        });
+        
+        indicators.appendChild(indicator);
+    });
+}
+
+// 更新页面指示器
+function updatePageIndicators() {
+    const indicators = document.querySelectorAll('.page-indicator');
+    indicators.forEach((indicator, index) => {
+        if (index === currentPage) {
+            indicator.classList.add('active');
+        } else {
+            indicator.classList.remove('active');
+        }
+    });
+}
+
+// 触发页面切换事件
+function triggerPageChangeEvent(from, to) {
+    const event = new CustomEvent('pagechange', {
+        detail: { from, to, pageName: pages[to].name }
+    });
+    document.dispatchEvent(event);
+}
+
+// 故事自动滚动功能
+function initStoryAutoScroll() {
+    const storyTimeline = document.getElementById('storyTimeline');
+    const autoScrollBtn = document.getElementById('autoScrollBtn');
+    const resetScrollBtn = document.getElementById('resetScrollBtn');
+    const progressBar = document.getElementById('scrollProgressBar');
+    
+    if (!storyTimeline) return;
+    
+    let isAutoScrolling = false;
+    let autoScrollInterval;
+    const storyItems = storyTimeline.querySelectorAll('.story-item');
+    
+    // 观察故事项目的可见性
+    const storyObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { 
+        root: storyTimeline,
+        threshold: 0.3 
+    });
+    
+    storyItems.forEach(item => {
+        storyObserver.observe(item);
+    });
+    
+    // 自动滚动按钮
+    autoScrollBtn?.addEventListener('click', () => {
+        if (isAutoScrolling) {
+            stopAutoScroll();
+        } else {
+            startAutoScroll();
+        }
+    });
+    
+    // 重置滚动按钮
+    resetScrollBtn?.addEventListener('click', () => {
+        stopAutoScroll();
+        storyTimeline.scrollTop = 0;
+        updateStoryProgress();
+        // 重置可见性
+        storyItems.forEach(item => {
+            item.classList.remove('visible');
+        });
+    });
+    
+    // 手动滚动时更新进度
+    storyTimeline.addEventListener('scroll', () => {
+        updateStoryProgress();
+        if (isAutoScrolling) {
+            // 如果用户手动滚动，停止自动滚动
+            stopAutoScroll();
+        }
+    });
+    
+    function startAutoScroll() {
+        isAutoScrolling = true;
+        autoScrollBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停滚动';
+        autoScrollBtn.classList.add('active');
+        
+        const scrollHeight = storyTimeline.scrollHeight - storyTimeline.clientHeight;
+        const duration = 10000; // 10秒滚动完成
+        const startTime = Date.now();
+        const startScrollTop = storyTimeline.scrollTop;
+        
+        function animateScroll() {
+            if (!isAutoScrolling) return;
+            
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeProgress = easeInOutQuad(progress);
+            
+            storyTimeline.scrollTop = startScrollTop + (scrollHeight - startScrollTop) * easeProgress;
+            updateStoryProgress();
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateScroll);
+            } else {
+                stopAutoScroll();
+            }
+        }
+        
+        requestAnimationFrame(animateScroll);
+    }
+    
+    function stopAutoScroll() {
+        isAutoScrolling = false;
+        autoScrollBtn.innerHTML = '<i class="fas fa-play"></i> 自动滚动';
+        autoScrollBtn.classList.remove('active');
+    }
+    
+    function updateStoryProgress() {
+        if (!progressBar) return;
+        const scrollHeight = storyTimeline.scrollHeight - storyTimeline.clientHeight;
+        const progress = scrollHeight > 0 ? (storyTimeline.scrollTop / scrollHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    }
+    
+    // 缓动函数
+    function easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+    
+    // 初始化进度
+    updateStoryProgress();
+}
+
+// 弹幕功能
+function initDanmaku() {
+    const danmakuContainer = document.getElementById('danmakuContainer');
+    if (!danmakuContainer) return;
+    
+    let danmakuQueue = [];
+    let danmakuInterval;
+    
+    // 预设的祝福语
+    const defaultWishes = [
+        "祝愿新人百年好合！💕",
+        "愿你们的爱情像美酒一样，越久越香醇 🍷",
+        "祝福你们永远幸福美满！✨",
+        "愿你们白头偕老，恩爱如初 👫",
+        "祝新人新婚快乐，早生贵子！👶",
+        "愿你们的婚姻充满欢声笑语 😄",
+        "祝愿你们相亲相爱一辈子！❤️",
+        "愿你们的爱情故事永远美丽 📖",
+        "祝福新人天作之合！🌟",
+        "愿你们共度美好人生！🌈"
+    ];
+    
+    // 启动弹幕
+    function startDanmaku() {
+        // 从本地存储加载祝福
+        const savedWishes = getWishes();
+        danmakuQueue = [...defaultWishes];
+        
+        // 添加用户祝福
+        if (savedWishes.length > 0) {
+            savedWishes.forEach(wish => {
+                danmakuQueue.push(`${wish.content} —— ${wish.name}`);
+            });
+        }
+        
+        // 随机打乱
+        danmakuQueue = shuffleArray(danmakuQueue);
+        
+        // 开始显示弹幕
+        danmakuInterval = setInterval(createDanmaku, 2000);
+        
+        // 立即显示第一个
+        createDanmaku();
+    }
+    
+    function createDanmaku() {
+        if (danmakuQueue.length === 0) {
+            // 重新填充队列
+            danmakuQueue = [...defaultWishes];
+            const savedWishes = getWishes();
+            if (savedWishes.length > 0) {
+                savedWishes.forEach(wish => {
+                    danmakuQueue.push(`${wish.content} —— ${wish.name}`);
+                });
+            }
+            danmakuQueue = shuffleArray(danmakuQueue);
+        }
+        
+        const wish = danmakuQueue.pop();
+        const danmakuItem = document.createElement('div');
+        danmakuItem.className = 'danmaku-item';
+        danmakuItem.textContent = wish;
+        
+        // 随机垂直位置
+        const top = Math.random() * 70 + 15; // 15% to 85%
+        danmakuItem.style.top = top + '%';
+        
+        // 随机样式
+        const styles = ['', 'fast', 'slow', 'special'];
+        const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+        if (randomStyle) {
+            danmakuItem.classList.add(randomStyle);
+        }
+        
+        danmakuContainer.appendChild(danmakuItem);
+        
+        // 动画结束后移除
+        setTimeout(() => {
+            if (danmakuItem.parentNode) {
+                danmakuItem.remove();
+            }
+        }, 20000);
+    }
+    
+    function shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    }
+    
+    // 当页面可见时启动弹幕
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (!danmakuInterval) {
+                    startDanmaku();
+                }
+            } else {
+                if (danmakuInterval) {
+                    clearInterval(danmakuInterval);
+                    danmakuInterval = null;
+                }
+            }
+        });
+    }, { threshold: 0.3 });
+    
+    const wishesSection = document.getElementById('wishes-section');
+    if (wishesSection) {
+        observer.observe(wishesSection);
+    }
+}
 
 // 导航栏功能
 function initNavbar() {
@@ -24,148 +417,96 @@ function initNavbar() {
     const navMenu = document.getElementById('navMenu');
     const navLinks = document.querySelectorAll('.nav-link');
     
-    // 滚动时导航栏效果
-    let lastScrollTop = 0;
-    window.addEventListener('scroll', () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        // 添加滚动样式
-        if (scrollTop > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-        
-        // 导航栏隐藏/显示效果
-        if (scrollTop > lastScrollTop && scrollTop > 100) {
-            navbar.style.transform = 'translateY(-100%)';
-        } else {
-            navbar.style.transform = 'translateY(0)';
-        }
-        
-        lastScrollTop = scrollTop;
-    });
-    
     // 移动端菜单切换
-    hamburger.addEventListener('click', () => {
+    hamburger?.addEventListener('click', () => {
         hamburger.classList.toggle('active');
         navMenu.classList.toggle('active');
     });
     
-    // 点击导航链接关闭移动端菜单
+    // 点击导航链接
     navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = link.getAttribute('href');
+            const targetId = href.substring(1); // 移除 #
+            
+            // 找到对应的页面索引
+            const pageIndex = pages.findIndex(page => page.id === targetId);
+            if (pageIndex !== -1) {
+                navigateToPage(pageIndex);
+            }
+            
+            // 关闭移动端菜单
+            hamburger?.classList.remove('active');
+            navMenu?.classList.remove('active');
         });
     });
     
-    // 点击外部区域关闭菜单
-    document.addEventListener('click', (e) => {
-        if (!navbar.contains(e.target)) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
+    // 监听页面变化，更新导航栏状态
+    document.addEventListener('pagechange', (e) => {
+        if (e.detail.to > 0) {
+            navbar?.classList.add('scrolled');
+        } else {
+            navbar?.classList.remove('scrolled');
         }
     });
 }
 
-// 背景自定义面板
-function initBackgroundPanel() {
-    const bgToggle = document.getElementById('bgToggle');
-    const backgroundPanel = document.getElementById('backgroundPanel');
-    const panelClose = document.getElementById('panelClose');
-    const bgOptions = document.querySelectorAll('.bg-option');
-    const bgUpload = document.getElementById('bgUpload');
+// 花瓣效果
+function initPetals() {
+    const petalsContainer = document.getElementById('petals');
+    if (!petalsContainer) return;
     
-    // 打开/关闭面板
-    bgToggle.addEventListener('click', () => {
-        backgroundPanel.classList.toggle('active');
-    });
+    const petalTypes = ['🌸', '🌺', '🌼', '🌻', '🌷', '🌹', '💐', '💮', '🏵️', '🌿'];
     
-    panelClose.addEventListener('click', () => {
-        backgroundPanel.classList.remove('active');
-    });
-    
-    // 点击外部关闭面板
-    document.addEventListener('click', (e) => {
-        if (!backgroundPanel.contains(e.target) && !bgToggle.contains(e.target)) {
-            backgroundPanel.classList.remove('active');
-        }
-    });
-    
-    // 选择预设背景
-    bgOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            const bgType = option.dataset.bg;
-            
-            // 移除所有活动状态
-            bgOptions.forEach(opt => opt.classList.remove('active'));
-            option.classList.add('active');
-            
-            // 应用背景
-            switch(bgType) {
-                case 'gradient1':
-                    document.body.style.background = 'linear-gradient(135deg, #ff6b9d 0%, #ffc0cb 100%)';
-                    break;
-                case 'gradient2':
-                    document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                    break;
-                case 'gradient3':
-                    document.body.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
-                    break;
-                case 'floral':
-                    document.body.style.background = `
-                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="3" fill="%23ff6b9d" opacity="0.3"/><circle cx="20" cy="30" r="2" fill="%23ffc0cb" opacity="0.4"/><circle cx="80" cy="70" r="2" fill="%23ff8fab" opacity="0.4"/></svg>'),
-                        linear-gradient(135deg, #ff6b9d 0%, #ffc0cb 100%)
-                    `;
-                    document.body.style.backgroundSize = '50px 50px, cover';
-                    break;
+    function createPetal() {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.textContent = petalTypes[Math.floor(Math.random() * petalTypes.length)];
+        
+        // 随机属性
+        const size = Math.random() * 20 + 15; // 15-35px
+        const startPosition = Math.random() * 100; // 0-100%
+        const animationDuration = Math.random() * 8 + 5; // 5-13秒
+        const rotationSpeed = Math.random() * 360 + 180; // 180-540度
+        const sway = Math.random() * 100 + 50; // 50-150px摆动幅度
+        const opacity = Math.random() * 0.7 + 0.3; // 0.3-1.0透明度
+        
+        petal.style.cssText = `
+            position: fixed;
+            left: ${startPosition}%;
+            top: -50px;
+            font-size: ${size}px;
+            opacity: ${opacity};
+            pointer-events: none;
+            z-index: 10;
+            animation: petalFall${Math.floor(Math.random() * 3) + 1} ${animationDuration}s linear forwards;
+            --sway: ${sway}px;
+            --rotation: ${rotationSpeed}deg;
+        `;
+        
+        petalsContainer.appendChild(petal);
+        
+        // 动画结束后移除花瓣
+        setTimeout(() => {
+            if (petal.parentNode) {
+                petal.remove();
             }
-            
-            document.body.style.backgroundAttachment = 'fixed';
-            
-            // 保存到localStorage
-            localStorage.setItem('selectedBackground', bgType);
-        });
-    });
+        }, animationDuration * 1000);
+    }
     
-    // 上传自定义背景
-    bgUpload.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.body.style.background = `url('${e.target.result}')`;
-                document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundAttachment = 'fixed';
-                document.body.style.backgroundPosition = 'center';
-                
-                // 移除预设背景的活动状态
-                bgOptions.forEach(opt => opt.classList.remove('active'));
-                
-                // 保存到localStorage
-                localStorage.setItem('customBackground', e.target.result);
-                localStorage.setItem('selectedBackground', 'custom');
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    // 持续创建花瓣
+    function startPetalRain() {
+        createPetal();
+        setTimeout(startPetalRain, Math.random() * 800 + 200); // 200-1000ms间隔
+    }
     
-    // 恢复保存的背景
-    const savedBg = localStorage.getItem('selectedBackground');
-    if (savedBg === 'custom') {
-        const customBg = localStorage.getItem('customBackground');
-        if (customBg) {
-            document.body.style.background = `url('${customBg}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundAttachment = 'fixed';
-            document.body.style.backgroundPosition = 'center';
-        }
-    } else if (savedBg) {
-        const savedOption = document.querySelector(`[data-bg="${savedBg}"]`);
-        if (savedOption) {
-            savedOption.click();
-        }
+    // 启动花瓣雨
+    startPetalRain();
+    
+    // 初始创建一些花瓣
+    for (let i = 0; i < 8; i++) {
+        setTimeout(() => createPetal(), i * 300);
     }
 }
 
@@ -178,6 +519,8 @@ function initCountdown() {
     const hoursEl = document.getElementById('hours');
     const minutesEl = document.getElementById('minutes');
     const secondsEl = document.getElementById('seconds');
+    
+    if (!daysEl || !hoursEl || !minutesEl || !secondsEl) return;
     
     function updateCountdown() {
         const now = new Date().getTime();
@@ -273,7 +616,8 @@ function initWishes() {
     const wishText = document.getElementById('wishText');
     const wishName = document.getElementById('wishName');
     const submitBtn = document.getElementById('submitWish');
-    const wishesList = document.getElementById('wishesList');
+    
+    if (!wishText || !wishName || !submitBtn) return;
     
     // 提交祝福
     submitBtn.addEventListener('click', () => {
@@ -286,7 +630,10 @@ function initWishes() {
             wishName.value = '';
             
             // 提交成功提示
-            showNotification('祝愿已留下！感谢家人的美好祝福 💕');
+            showNotification('祝愿已发送！您的祝福将出现在弹幕中 🎉');
+            
+            // 立即添加到弹幕
+            addDanmakuWish(`${text} —— ${name}`);
         } else {
             showNotification('请填写完整的祝福内容和家人姓名');
         }
@@ -298,9 +645,6 @@ function initWishes() {
             submitBtn.click();
         }
     });
-    
-    // 加载保存的祝福
-    loadWishes();
 }
 
 function addWish(name, content) {
@@ -314,35 +658,28 @@ function addWish(name, content) {
     
     wishes.unshift(newWish);
     saveWishes(wishes);
-    displayWish(newWish);
 }
 
-function displayWish(wish) {
-    const wishesList = document.getElementById('wishesList');
-    const wishElement = document.createElement('div');
-    wishElement.className = 'wish-item';
-    wishElement.innerHTML = `
-        <div class="wish-header">
-            <span class="wish-author">${wish.name}</span>
-            <span class="wish-date">${wish.date}</span>
-        </div>
-        <div class="wish-content">${wish.content}</div>
-    `;
+function addDanmakuWish(wishText) {
+    const danmakuContainer = document.getElementById('danmakuContainer');
+    if (!danmakuContainer) return;
     
-    wishesList.insertBefore(wishElement, wishesList.firstChild);
+    const danmakuItem = document.createElement('div');
+    danmakuItem.className = 'danmaku-item special';
+    danmakuItem.textContent = wishText;
     
-    // 添加入场动画
+    // 随机垂直位置
+    const top = Math.random() * 70 + 15;
+    danmakuItem.style.top = top + '%';
+    
+    danmakuContainer.appendChild(danmakuItem);
+    
+    // 动画结束后移除
     setTimeout(() => {
-        wishElement.style.opacity = '1';
-        wishElement.style.transform = 'translateY(0)';
-    }, 100);
-}
-
-function loadWishes() {
-    const wishes = getWishes();
-    wishes.forEach(wish => {
-        displayWish(wish);
-    });
+        if (danmakuItem.parentNode) {
+            danmakuItem.remove();
+        }
+    }, 20000);
 }
 
 function getWishes() {
@@ -404,6 +741,7 @@ function showNotification(message) {
 // 粒子效果
 function initParticles() {
     const particlesContainer = document.getElementById('particles');
+    if (!particlesContainer) return;
     
     function createParticle() {
         const particle = document.createElement('div');
@@ -463,210 +801,15 @@ function initScrollAnimations() {
     });
 }
 
-// 平滑滚动
-function initSmoothScroll() {
-    const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            const targetId = link.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                const offsetTop = targetElement.offsetTop - 80; // 考虑导航栏高度
-                
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-    
-    // 滚动到顶部按钮
-    const scrollTopBtn = document.createElement('button');
-    scrollTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-    scrollTopBtn.className = 'scroll-top-btn';
-    scrollTopBtn.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #ff6b9d 0%, #ffc0cb 100%);
-        color: white;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1000;
-        font-size: 16px;
-    `;
-    
-    document.body.appendChild(scrollTopBtn);
-    
-    // 滚动时显示/隐藏按钮
-    window.addEventListener('scroll', () => {
-        if (window.pageYOffset > 500) {
-            scrollTopBtn.style.opacity = '1';
-            scrollTopBtn.style.transform = 'translateY(0)';
-        } else {
-            scrollTopBtn.style.opacity = '0';
-            scrollTopBtn.style.transform = 'translateY(20px)';
-        }
-    });
-    
-    // 点击滚动到顶部
-    scrollTopBtn.addEventListener('click', () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
-    
-    // 悬停效果
-    scrollTopBtn.addEventListener('mouseenter', () => {
-        scrollTopBtn.style.transform = 'translateY(-5px) scale(1.1)';
-    });
-    
-    scrollTopBtn.addEventListener('mouseleave', () => {
-        scrollTopBtn.style.transform = 'translateY(0) scale(1)';
-    });
-}
-
-// 地图配置 - 可自定义经纬度
-const MAP_CONFIG = {
-    // 默认坐标（北京天安门广场示例，请修改为实际地址坐标）
-    latitude: 39.908823,    // 纬度
-    longitude: 116.397470,  // 经度
-    title: '聚会地点',       // 地点标题
-    address: '温馨的家中环境', // 地址描述
-    // 可选：自定义地点名称
-    locationName: 'W & J 的家庭聚会地点'
+// 餐厅位置配置 - 固定不可修改
+const RESTAURANT_CONFIG = {
+    // 郑州市楚境餐厅（省政府店）坐标
+    latitude: 34.7466,      // 纬度
+    longitude: 113.6253,    // 经度
+    title: '楚境餐厅（省政府店）',    // 餐厅名称
+    address: '郑州市金水区省政府附近', // 地址描述
+    phone: '0371-66565555'  // 电话号码
 };
-
-// 地图配置面板功能
-function initMapConfigPanel() {
-    const mapConfigToggle = document.getElementById('mapConfigToggle');
-    const mapConfigPanel = document.getElementById('mapConfigPanel');
-    const mapPanelClose = document.getElementById('mapPanelClose');
-    const updateMapConfigBtn = document.getElementById('updateMapConfig');
-    const getCurrentLocationBtn = document.getElementById('getCurrentLocationBtn');
-    const presetBtns = document.querySelectorAll('.preset-btn');
-    
-    // 打开/关闭面板
-    mapConfigToggle?.addEventListener('click', () => {
-        mapConfigPanel.classList.toggle('active');
-        // 关闭背景面板
-        document.getElementById('backgroundPanel').classList.remove('active');
-    });
-    
-    mapPanelClose?.addEventListener('click', () => {
-        mapConfigPanel.classList.remove('active');
-    });
-    
-    // 点击外部关闭面板
-    document.addEventListener('click', (e) => {
-        if (!mapConfigPanel.contains(e.target) && !mapConfigToggle.contains(e.target)) {
-            mapConfigPanel.classList.remove('active');
-        }
-    });
-    
-    // 更新地图配置
-    updateMapConfigBtn?.addEventListener('click', () => {
-        const newLat = parseFloat(document.getElementById('newLat').value);
-        const newLng = parseFloat(document.getElementById('newLng').value);
-        const newTitle = document.getElementById('newTitle').value.trim();
-        const newAddress = document.getElementById('newAddress').value.trim();
-        
-        if (isNaN(newLat) || isNaN(newLng)) {
-            showNotification('请输入有效的经纬度数值');
-            return;
-        }
-        
-        if (newLat < -90 || newLat > 90) {
-            showNotification('纬度应在 -90 到 90 之间');
-            return;
-        }
-        
-        if (newLng < -180 || newLng > 180) {
-            showNotification('经度应在 -180 到 180 之间');
-            return;
-        }
-        
-        const config = {
-            latitude: newLat,
-            longitude: newLng
-        };
-        
-        if (newTitle) config.title = newTitle;
-        if (newAddress) config.address = newAddress;
-        
-        updateMapConfig(config);
-        updateMapDisplay();
-        
-        // 清空输入框
-        document.getElementById('newLat').value = '';
-        document.getElementById('newLng').value = '';
-        document.getElementById('newTitle').value = '';
-        document.getElementById('newAddress').value = '';
-    });
-    
-    // 获取当前位置
-    getCurrentLocationBtn?.addEventListener('click', () => {
-        getCurrentLocation();
-    });
-    
-    // 预设位置按钮
-    presetBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const lat = parseFloat(btn.dataset.lat);
-            const lng = parseFloat(btn.dataset.lng);
-            const title = btn.dataset.title;
-            const address = btn.dataset.address;
-            
-            updateMapConfig({
-                latitude: lat,
-                longitude: lng,
-                title: title,
-                address: address
-            });
-            updateMapDisplay();
-        });
-    });
-    
-    // 初始化显示
-    updateMapDisplay();
-}
-
-// 更新地图配置显示
-function updateMapDisplay() {
-    const { latitude, longitude, title, address } = MAP_CONFIG;
-    
-    const currentLat = document.getElementById('currentLat');
-    const currentLng = document.getElementById('currentLng');
-    const currentTitle = document.getElementById('currentTitle');
-    const currentLocation = document.getElementById('currentLocation');
-    
-    if (currentLat) currentLat.textContent = latitude.toFixed(6);
-    if (currentLng) currentLng.textContent = longitude.toFixed(6);
-    if (currentTitle) currentTitle.textContent = title;
-    
-    // 更新当前位置显示
-    if (currentLocation) {
-        currentLocation.innerHTML = `
-            <p><strong>经度：</strong><span>${longitude.toFixed(6)}</span></p>
-            <p><strong>纬度：</strong><span>${latitude.toFixed(6)}</span></p>
-            <p><strong>地点：</strong><span>${title}</span></p>
-            <p><strong>描述：</strong><span>${address}</span></p>
-        `;
-    }
-}
 
 // 地图功能
 function initMapFunction() {
@@ -679,26 +822,54 @@ function initMapFunction() {
     });
 }
 
+// 电话功能
+function initPhoneCall() {
+    const callBtn = document.querySelector('.call-btn');
+    if (!callBtn) return;
+    
+    callBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const phone = RESTAURANT_CONFIG.phone;
+        // 尝试拨打电话
+        window.location.href = `tel:${phone}`;
+        showNotification(`正在为您拨打 ${phone} 📞`);
+    });
+}
+
 // 打开百度地图
 function openBaiduMap() {
-    const { latitude, longitude, title, address, locationName } = MAP_CONFIG;
+    const { title } = RESTAURANT_CONFIG;
     
     // 百度地图APP的URL Scheme
-    const baiduAppUrl = `baidumap://map/marker?location=${latitude},${longitude}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(address)}&src=webapp.marry.wj`;
+    const baiduAppUrl = `baidumap://map/poi/detail?uid=b7d23b502bd7f1c38605bf66&src=webapp.marry.wj`;
     
-    // 百度地图网页版备用链接
-    const baiduWebUrl = `https://api.map.baidu.com/marker?location=${latitude},${longitude}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(address)}&output=html&src=webapp.marry.wj`;
+    // 百度地图网页版直链（用户提供的准确链接）
+    const baiduWebUrl = `https://map.baidu.com/poi/%E6%A5%9A%E5%A2%83%E9%A4%90%E5%8E%85(%E7%9C%81%E6%94%BF%E5%BA%9C%E5%BA%97)/@12663006.531564746,4108577.489719764,19z?uid=b7d23b502bd7f1c38605bf66&ugc_type=3&ugc_ver=1&device_ratio=2&compat=1&pcevaname=pc4.1&querytype=detailConInfo&da_src=shareurl`;
+    
+    let isIframeRemoved = false;
+    
+    // 安全移除iframe的函数
+    const safeRemoveIframe = () => {
+        if (!isIframeRemoved && document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+            isIframeRemoved = true;
+        }
+    };
     
     // 尝试打开百度地图APP
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
+    iframe.style.position = 'absolute';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '1px';
+    iframe.style.height = '1px';
     iframe.src = baiduAppUrl;
     document.body.appendChild(iframe);
     
     // 设置超时，如果APP未打开则打开网页版
     let timeout = setTimeout(() => {
-        // 移除iframe
-        document.body.removeChild(iframe);
+        // 安全移除iframe
+        safeRemoveIframe();
         // 打开网页版地图
         window.open(baiduWebUrl, '_blank');
         showNotification('正在为您打开百度地图网页版 🗺️');
@@ -707,127 +878,15 @@ function openBaiduMap() {
     // 如果成功拉起APP，清除超时
     window.addEventListener('blur', () => {
         clearTimeout(timeout);
-        document.body.removeChild(iframe);
+        safeRemoveIframe();
         showNotification('正在为您打开百度地图APP 📱');
     }, { once: true });
     
     // 立即移除iframe的备用方案
     setTimeout(() => {
-        if (document.body.contains(iframe)) {
-            document.body.removeChild(iframe);
-        }
+        safeRemoveIframe();
     }, 100);
 }
-
-// 更新地图配置的函数
-function updateMapConfig(newConfig) {
-    Object.assign(MAP_CONFIG, newConfig);
-    // 保存到localStorage
-    localStorage.setItem('mapConfig', JSON.stringify(MAP_CONFIG));
-    showNotification('地图位置已更新 📍');
-}
-
-// 从localStorage恢复地图配置
-function loadMapConfig() {
-    const saved = localStorage.getItem('mapConfig');
-    if (saved) {
-        try {
-            const savedConfig = JSON.parse(saved);
-            Object.assign(MAP_CONFIG, savedConfig);
-            // 延迟更新显示，确保DOM已加载
-            setTimeout(() => {
-                if (typeof updateMapDisplay === 'function') {
-                    updateMapDisplay();
-                }
-            }, 100);
-        } catch (e) {
-            console.warn('地图配置加载失败，使用默认配置');
-        }
-    }
-}
-
-// 获取用户位置的函数（可选功能）
-function getCurrentLocation() {
-    if (!navigator.geolocation) {
-        showNotification('您的浏览器不支持地理定位功能');
-        return;
-    }
-    
-    showNotification('正在获取您的位置...');
-    
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const { latitude, longitude } = position.coords;
-            updateMapConfig({
-                latitude: latitude,
-                longitude: longitude,
-                title: '当前位置',
-                address: '您当前所在的位置'
-            });
-            updateMapDisplay();
-            showNotification('已设置为当前位置 📍');
-        },
-        (error) => {
-            let message = '无法获取位置信息';
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    message = '位置访问被拒绝，请在浏览器设置中允许位置访问';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    message = '位置信息不可用';
-                    break;
-                case error.TIMEOUT:
-                    message = '获取位置信息超时';
-                    break;
-            }
-            showNotification(message);
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 300000
-        }
-    );
-}
-
-// 页面加载完成后的额外设置
-window.addEventListener('load', () => {
-    // 预加载动画
-    const loader = document.createElement('div');
-    loader.className = 'loader';
-    loader.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #ff6b9d 0%, #ffc0cb 100%);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 1;
-        transition: opacity 0.5s ease;
-    `;
-    
-    const loaderHeart = document.createElement('div');
-    loaderHeart.innerHTML = '💕';
-    loaderHeart.style.cssText = `
-        font-size: 4rem;
-        animation: heartbeat 1s infinite;
-    `;
-    
-    loader.appendChild(loaderHeart);
-    document.body.appendChild(loader);
-    
-    // 延迟隐藏加载动画
-    setTimeout(() => {
-        loader.style.opacity = '0';
-        setTimeout(() => {
-            loader.remove();
-        }, 500);
-    }, 1500);
-});
 
 // 错误处理
 window.addEventListener('error', (e) => {
@@ -843,49 +902,3 @@ if ('performance' in window) {
         }, 0);
     });
 }
-
-// 添加一些额外的互动效果
-document.addEventListener('mousemove', (e) => {
-    // 鼠标跟随效果（可选）
-    if (Math.random() > 0.995) { // 低频率创建
-        createMouseParticle(e.clientX, e.clientY);
-    }
-});
-
-function createMouseParticle(x, y) {
-    const particle = document.createElement('div');
-    particle.style.cssText = `
-        position: fixed;
-        left: ${x}px;
-        top: ${y}px;
-        width: 4px;
-        height: 4px;
-        background: rgba(255, 107, 157, 0.6);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 1000;
-        animation: mouseParticle 1s ease-out forwards;
-    `;
-    
-    document.body.appendChild(particle);
-    
-    setTimeout(() => {
-        particle.remove();
-    }, 1000);
-}
-
-// 添加鼠标粒子动画
-const mouseParticleStyle = document.createElement('style');
-mouseParticleStyle.textContent = `
-    @keyframes mouseParticle {
-        0% {
-            transform: scale(0) translateY(0);
-            opacity: 1;
-        }
-        100% {
-            transform: scale(1) translateY(-20px);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(mouseParticleStyle);

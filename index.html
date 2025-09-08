@@ -9,97 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- 背景自定义面板 -->
-    <div class="background-panel" id="backgroundPanel">
-        <div class="panel-header">
-            <h3>自定义背景</h3>
-            <button class="panel-close" id="panelClose">&times;</button>
-        </div>
-        <div class="background-options">
-            <div class="bg-option" data-bg="gradient1">
-                <div class="bg-preview gradient1"></div>
-                <span>浪漫渐变</span>
-            </div>
-            <div class="bg-option" data-bg="gradient2">
-                <div class="bg-preview gradient2"></div>
-                <span>温馨粉色</span>
-            </div>
-            <div class="bg-option" data-bg="gradient3">
-                <div class="bg-preview gradient3"></div>
-                <span>天空蓝</span>
-            </div>
-            <div class="bg-option" data-bg="floral">
-                <div class="bg-preview floral"></div>
-                <span>花卉图案</span>
-            </div>
-            <div class="upload-section">
-                <label for="bgUpload" class="upload-label">
-                    <i class="fas fa-upload"></i>
-                    上传自定义背景
-                </label>
-                <input type="file" id="bgUpload" accept="image/*">
-            </div>
-        </div>
-    </div>
 
-    <!-- 地图配置面板 -->
-    <div class="map-config-panel" id="mapConfigPanel">
-        <div class="panel-header">
-            <h3>地图配置</h3>
-            <button class="panel-close" id="mapPanelClose">&times;</button>
-        </div>
-        <div class="map-config-content">
-            <div class="config-section">
-                <h4>当前设置</h4>
-                <div class="current-location" id="currentLocation">
-                    <p><strong>经度：</strong><span id="currentLng">116.397470</span></p>
-                    <p><strong>纬度：</strong><span id="currentLat">39.908823</span></p>
-                    <p><strong>地点：</strong><span id="currentTitle">聚会地点</span></p>
-                </div>
-            </div>
-            
-            <div class="config-section">
-                <h4>修改坐标</h4>
-                <div class="input-group">
-                    <label for="newLat">纬度：</label>
-                    <input type="number" id="newLat" step="0.000001" placeholder="例如：39.908823">
-                </div>
-                <div class="input-group">
-                    <label for="newLng">经度：</label>
-                    <input type="number" id="newLng" step="0.000001" placeholder="例如：116.397470">
-                </div>
-                <div class="input-group">
-                    <label for="newTitle">地点名称：</label>
-                    <input type="text" id="newTitle" placeholder="例如：家庭聚会地点">
-                </div>
-                <div class="input-group">
-                    <label for="newAddress">地址描述：</label>
-                    <input type="text" id="newAddress" placeholder="例如：温馨的家中环境">
-                </div>
-                <div class="config-buttons">
-                    <button class="config-btn update-btn" id="updateMapConfig">
-                        <i class="fas fa-save"></i> 更新坐标
-                    </button>
-                    <button class="config-btn location-btn" id="getCurrentLocationBtn">
-                        <i class="fas fa-crosshairs"></i> 获取当前位置
-                    </button>
-                </div>
-            </div>
-            
-            <div class="config-section">
-                <h4>快速设置</h4>
-                <div class="preset-locations">
-                    <button class="preset-btn" data-lat="39.908823" data-lng="116.397470" data-title="天安门广场" data-address="北京市东城区">北京天安门</button>
-                    <button class="preset-btn" data-lat="31.230416" data-lng="121.473701" data-title="东方明珠" data-address="上海市浦东新区">上海东方明珠</button>
-                    <button class="preset-btn" data-lat="22.543099" data-lng="114.057868" data-title="深圳市民中心" data-address="深圳市福田区">深圳市民中心</button>
-                </div>
-                <p class="config-help">
-                    <i class="fas fa-info-circle"></i>
-                    点击“查看地图”按钮将优先尝试打开百度地图APP，如果没有安装则会自动跳转到网页版。
-                </p>
-            </div>
-        </div>
-    </div>
 
     <!-- 导航栏 -->
     <nav class="navbar" id="navbar">
@@ -107,11 +17,9 @@
             <div class="nav-logo">W & J</div>
             <ul class="nav-menu" id="navMenu">
                 <li><a href="#hero" class="nav-link">首页</a></li>
-                <li><a href="#couple" class="nav-link">新人</a></li>
-                <li><a href="#details" class="nav-link">详情</a></li>
-                <li><a href="#story" class="nav-link">我们的故事</a></li>
-                <li><button class="bg-toggle" id="bgToggle"><i class="fas fa-palette"></i></button></li>
-                <li><button class="map-config-toggle" id="mapConfigToggle" title="地图配置"><i class="fas fa-map-marker-alt"></i></button></li>
+                <li><a href="#restaurant-section" class="nav-link">聚会地点</a></li>
+                <li><a href="#story" class="nav-link">宴会环节</a></li>
+                <li><a href="#wishes-section" class="nav-link">家人祝福</a></li>
             </ul>
             <div class="hamburger" id="hamburger">
                 <span></span>
@@ -121,8 +29,19 @@
         </div>
     </nav>
 
-    <!-- 主页面 -->
-    <main class="main-content">
+    <!-- 页面指示器 -->
+    <div class="page-indicators" id="pageIndicators">
+        <div class="page-indicator active" data-page="0" data-label="首页"></div>
+        <div class="page-indicator" data-page="1" data-label="餐厅"></div>
+        <div class="page-indicator" data-page="2" data-label="新人"></div>
+        <div class="page-indicator" data-page="3" data-label="故事"></div>
+        <div class="page-indicator" data-page="4" data-label="祝福"></div>
+    </div>
+
+    <!-- 全屏页面容器 -->
+    <div class="fullscreen-container" id="fullscreenContainer">
+        <!-- 主页面 -->
+        <main class="main-content">
         <!-- Hero 区域 -->
         <section id="hero" class="hero">
             <div class="hero-content">
@@ -142,64 +61,133 @@
                 <div class="scroll-indicator">
                     <div class="scroll-arrow"></div>
                 </div>
-            </div>
-        </section>
+                            </div>
+            </section>
 
-        <!-- 新人介绍 -->
-        <section id="couple" class="couple-section">
+        <!-- 聚会详情 - 移到首页显眼位置 -->
+        <section id="restaurant-section" class="restaurant-section">
             <div class="container">
                 <div class="section-header" data-aos="fade-up">
-                    <h2 class="section-title">新人介绍</h2>
+                    <h2 class="section-title">宴会·地点</h2>
                     <div class="section-divider">
                         <div class="divider-line"></div>
-                        <i class="fas fa-heart divider-icon"></i>
+                        <i class="fas fa-utensils divider-icon"></i>
                         <div class="divider-line"></div>
                     </div>
                 </div>
-                
-                <div class="couple-cards">
-                    <div class="couple-card bride-card" data-aos="fade-right">
-                        <div class="card-inner">
-                            <div class="card-front">
-                                <div class="photo-frame">
-                                    <div class="photo-display bride-photo">
-                                        <i class="fas fa-female"></i>
+
+                <div class="restaurant-showcase">
+                    <div class="restaurant-hero" data-aos="fade-up">
+                        <div class="restaurant-images">
+                            <div class="main-image">
+                                <img src="https://sns-webpic-qc.xhscdn.com/202509082236/3745130f82ba0cb6d2a05738eaaa7638/1040g2sg31agibvdoni805o758qe84ibidvvj3do!nd_dft_wlteh_webp_3" alt="楚境餐厅门头" />
+                            </div>
+                            <div class="side-images">
+                                <div class="side-image">
+                                    <img src="https://sns-webpic-qc.xhscdn.com/202509082236/6e6b35afa98f5e3831df1d2691133d17/1040g2sg31agibvdoni705o758qe84ibi5n0lug8!nd_dft_wlteh_webp_3" alt="楚境餐厅环境" />
+                                </div>
+                                <div class="side-image">
+                                    <img src="https://sns-webpic-qc.xhscdn.com/202509082241/136501c33247f2e342f39b3ea772f73b/1040g2sg31jdbpkiviieg5pv3gcqj9atqk5891g0!nd_dft_wlteh_webp_3" alt="楚境餐厅菜品" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="restaurant-info">
+                            <div class="restaurant-header">
+                                <h3 class="restaurant-name">郑州市楚境餐厅（省政府店）</h3>
+                                <div class="restaurant-rating">
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="rating-text">五星好评</span>
+                                </div>
+                            </div>
+                            
+                            <div class="restaurant-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <div class="detail-content">
+                                        <h4>2025年10月3日（金星日）</h4>
+                                        <p>中午11:00 - 14:00</p>
+                                        <small>金星日，象征爱情和美好关系</small>
                                     </div>
                                 </div>
-                                <div class="card-info">
-                                    <h3 class="name">W</h3>
-                                    <p class="role">温柔女孩</p>
-                                    <div class="social-icons">
-                                        <i class="fab fa-instagram"></i>
-                                        <i class="fab fa-facebook"></i>
-                                        <i class="fab fa-twitter"></i>
+                                
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div class="detail-content">
+                                        <h4>郑州市楚境餐厅（省政府店）</h4>
+                                        <p>环境优雅，景色宜人，适合家庭聚会</p>
+                                        <div class="location-actions">
+                                            <button class="map-btn primary" id="mapBtn">
+                                                <i class="fas fa-directions"></i>
+                                                查看地图
+                                            </button>
+                                            <button class="call-btn">
+                                                <i class="fas fa-phone"></i>
+                                               0371-66565555/15538151935
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <i class="fas fa-users"></i>
+                                    <div class="detail-content">
+                                        <h4>亲密家庭聚会</h4>
+                                        <p>双方父母及亲密家人，一起分享这个特殊时刻</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="couple-heart" data-aos="zoom-in" data-aos-delay="200">
-                        <i class="fas fa-heart"></i>
+                    
+                    <div class="restaurant-gallery" data-aos="fade-up" data-aos-delay="100">
+                        <h3 class="gallery-title">特色菜品展示</h3>
+                        <div class="gallery-grid">
+                            <div class="gallery-item">
+                                <img src="https://sns-webpic-qc.xhscdn.com/202509082241/136501c33247f2e342f39b3ea772f73b/1040g2sg31jdbpkiviieg5pv3gcqj9atqk5891g0!nd_dft_wlteh_webp_3" alt="楚境餐厅特色菜品" />
+                                <div class="gallery-overlay">
+                                    <span>精美菜品</span>
+                                </div>
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://sns-webpic-qc.xhscdn.com/202509082241/9ad6f7a407f3dd5d7a597d72732339b3/1040g2sg31jdbpkiviif05pv3gcqj9atq8ok3lhg!nd_dft_wlteh_webp_3" alt="楚境餐厅特色菜品" />
+                                <div class="gallery-overlay">
+                                    <span>招牌美食</span>
+                                </div>
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://sns-webpic-qc.xhscdn.com/202509082241/d2236370a434ebbd12d9beb239437bf5/1040g2sg31jdbpkiviifg5pv3gcqj9atqqge507o!nd_dft_wlteh_webp_3" alt="楚境餐厅特色菜品" />
+                                <div class="gallery-overlay">
+                                    <span>特色佳肴</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="couple-card groom-card" data-aos="fade-left" data-aos-delay="100">
-                        <div class="card-inner">
-                            <div class="card-front">
-                                <div class="photo-frame">
-                                    <div class="photo-display groom-photo">
-                                        <i class="fas fa-male"></i>
-                                    </div>
-                                </div>
-                                <div class="card-info">
-                                    <h3 class="name">J</h3>
-                                    <p class="role">阳光男孩</p>
-                                    <div class="social-icons">
-                                        <i class="fab fa-instagram"></i>
-                                        <i class="fab fa-facebook"></i>
-                                        <i class="fab fa-twitter"></i>
-                                    </div>
-                                </div>
+                    
+                    <div class="countdown-section" data-aos="fade-up" data-aos-delay="200">
+                        <h3>距离美好时刻</h3>
+                        <div class="countdown" id="countdown">
+                            <div class="countdown-item">
+                                <span class="countdown-number" id="days">00</span>
+                                <span class="countdown-label">天</span>
+                            </div>
+                            <div class="countdown-item">
+                                <span class="countdown-number" id="hours">00</span>
+                                <span class="countdown-label">时</span>
+                            </div>
+                            <div class="countdown-item">
+                                <span class="countdown-number" id="minutes">00</span>
+                                <span class="countdown-label">分</span>
+                            </div>
+                            <div class="countdown-item">
+                                <span class="countdown-number" id="seconds">00</span>
+                                <span class="countdown-label">秒</span>
                             </div>
                         </div>
                     </div>
@@ -207,204 +195,219 @@
             </div>
         </section>
 
-        <!-- 订婚详情 -->
-        <section id="details" class="details-section">
-            <div class="container">
-                <div class="section-header" data-aos="fade-up">
-                    <h2 class="section-title">聚会详情</h2>
-                    <div class="section-divider">
-                        <div class="divider-line"></div>
-                        <i class="fas fa-rings-wedding divider-icon"></i>
-                        <div class="divider-line"></div>
-                    </div>
-                </div>
-
-                <div class="details-grid">
-                    <div class="detail-card" data-aos="fade-up" data-aos-delay="100">
-                        <div class="detail-icon">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <div class="detail-content">
-                            <h3>时间</h3>
-                            <p class="detail-main">2025年10月3日</p>
-                            <p class="detail-sub">星期五 · 中午11:00</p>
-                            <p class="detail-meaning">💫 金星日，象征爱情和美好关系</p>
-                            <div class="countdown" id="countdown">
-                                <div class="countdown-item">
-                                    <span class="countdown-number" id="days">00</span>
-                                    <span class="countdown-label">天</span>
-                                </div>
-                                <div class="countdown-item">
-                                    <span class="countdown-number" id="hours">00</span>
-                                    <span class="countdown-label">时</span>
-                                </div>
-                                <div class="countdown-item">
-                                    <span class="countdown-number" id="minutes">00</span>
-                                    <span class="countdown-label">分</span>
-                                </div>
-                                <div class="countdown-item">
-                                    <span class="countdown-number" id="seconds">00</span>
-                                    <span class="countdown-label">秒</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="detail-card" data-aos="fade-up" data-aos-delay="200">
-                        <div class="detail-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="detail-content">
-                            <h3>地点</h3>
-                            <p class="detail-main">温馨家庭聚会</p>
-                            <p class="detail-sub">家人围坐 · 亲密分享</p>
-                            <p class="detail-address">地址：温馨的家中环境</p>
-                            <button class="map-btn" id="mapBtn">
-                                <i class="fas fa-directions"></i>
-                                查看地图
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="detail-card" data-aos="fade-up" data-aos-delay="300">
-                        <div class="detail-icon">
-                            <i class="fas fa-glass-cheers"></i>
-                        </div>
-                        <div class="detail-content">
-                            <h3>聚会安排</h3>
-                            <div class="timeline">
-                                <div class="timeline-item">
-                                    <div class="timeline-time">11:00</div>
-                                    <div class="timeline-content">家人集合</div>
-                                </div>
-                                <div class="timeline-item">
-                                    <div class="timeline-time">11:30</div>
-                                    <div class="timeline-content">爱情分享</div>
-                                </div>
-                                <div class="timeline-item">
-                                    <div class="timeline-time">12:00</div>
-                                    <div class="timeline-content">家庭午餐</div>
-                                </div>
-                                <div class="timeline-item">
-                                    <div class="timeline-time">14:00</div>
-                                    <div class="timeline-content">温馨时光</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- 我们的故事 -->
         <section id="story" class="story-section">
             <div class="container">
                 <div class="section-header" data-aos="fade-up">
-                    <h2 class="section-title">我们的故事</h2>
+                    <h2 class="section-title">宴会环节</h2>
                     <div class="section-divider">
                         <div class="divider-line"></div>
-                        <i class="fas fa-book-heart divider-icon"></i>
+                        <i class="fas fa-calendar-check divider-icon"></i>
                         <div class="divider-line"></div>
                     </div>
                 </div>
 
-                <div class="story-timeline">
-                    <div class="story-item" data-aos="fade-right">
-                        <div class="story-date">2022年春天</div>
-                        <div class="story-content">
-                            <h3>初次相遇</h3>
-                            <p>那是一个阳光明媚的春日午后，我们在咖啡店里偶然相遇。你的笑容如春日暖阳，瞬间点亮了我的世界。从那一刻起，我就知道，你就是我一直在寻找的那个人。</p>
+                <div class="story-container">
+                    <div class="story-timeline" id="storyTimeline">
+                        <div class="story-item">
+                            <div class="story-date">11:00-11:10</div>
+                            <div class="story-content">
+                                <h3>迎宾入座</h3>
+                                <p>家人们陆续到达餐厅，相互寒暄问候，入座准备。建议提前5-10分钟到达，以便从容安排座位。女方长辈坐主桌左侧，男方长辈坐主桌右侧。</p>
+                                <div class="preparation-tip">💡 准备提示：请准时到达，着装整洁大方</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
                         </div>
-                        <div class="story-icon">
-                            <i class="fas fa-coffee"></i>
+
+                        <div class="story-item">
+                            <div class="story-date">11:10-11:20</div>
+                            <div class="story-content">
+                                <h3>家庭介绍</h3>
+                                <p>双方家长正式介绍各自家庭成员，营造温馨和谐的氛围。新人会逐一介绍双方亲属，让两个家庭更好地相互了解和认识。</p>
+                                <div class="preparation-tip">💡 准备提示：准备简单的自我介绍，展现家庭和睦</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-handshake"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item">
+                            <div class="story-date">11:20-11:30</div>
+                            <div class="story-content">
+                                <h3>奉上聘礼</h3>
+                                <p>按照中式传统，男方家长向女方家长郑重奉上聘礼，表达对女方家庭的尊重和诚意。女方家长接受聘礼，象征着两家正式结为亲家，是订婚仪式的重要组成部分。</p>
+                                <div class="preparation-tip">💡 准备提示：男方准备聘礼红包，表达诚意和尊重</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item">
+                            <div class="story-date">11:30-11:40</div>
+                            <div class="story-content">
+                                <h3>签订婚约</h3>
+                                <p>新人在家长见证下签署订婚契约书，郑重承诺相伴一生。契约书上会写明双方的承诺和对未来的美好憧憬，具有特殊的纪念意义。</p>
+                                <div class="preparation-tip">💡 准备提示：准备签字笔，保持仪式感</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-file-signature"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item">
+                            <div class="story-date">11:40-11:55</div>
+                            <div class="story-content">
+                                <h3>父母致辞</h3>
+                                <p>双方父母轮流发表感言，分享对新人的祝福和期望。这是情感交流的温馨时刻，父母的话语将成为新人前行路上的宝贵财富。</p>
+                                <div class="preparation-tip">💡 准备提示：可提前准备简短发言稿，表达真挚祝福</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item">
+                            <div class="story-date">11:55-12:10</div>
+                            <div class="story-content">
+                                <h3>新人敬茶</h3>
+                                <p>新人向双方父母敬茶，这是中式婚礼的传统仪式。新人会依次向长辈敬茶，表达孝心和感谢</p>
+                                <div class="preparation-tip">💡 准备提示：准备茶具和优质茶叶，新人准备感谢词</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-coffee"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item">
+                            <div class="story-date">12:10-12:20</div>
+                            <div class="story-content">
+                                <h3>交换信物</h3>
+                                <p>男方为女方戴上订婚戒指，这个神圣时刻标志着两人正式订婚，彼此许下终身承诺。</p>
+                                <div class="preparation-tip">💡 准备提示：提前准备好订婚戒指或信物</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-ring"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item">
+                            <div class="story-date">12:20-12:35</div>
+                            <div class="story-content">
+                                <h3>全家合影</h3>
+                                <p>全体家人拍摄各种组合的纪念照片，记录这个特殊的日子。包括全家福、双方家庭合影、新人与长辈合影等，留下珍贵的回忆。</p>
+                                <div class="preparation-tip">💡 准备提示：整理仪表，准备灿烂笑容</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item">
+                            <div class="story-date">12:35-12:45</div>
+                            <div class="story-content">
+                                <h3>切蛋糕仪式</h3>
+                                <p>新人共同切订婚蛋糕，象征甜蜜生活的开始。大家一起分享蛋糕，品尝幸福的滋味，为新人的美好未来干杯庆祝。</p>
+                                <div class="preparation-tip">💡 准备提示：准备切蛋糕刀具和小盘子</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item">
+                            <div class="story-date">12:45-14:15</div>
+                            <div class="story-content">
+                                <h3>开席用餐</h3>
+                                <p>大家围坐一桌，享用精心准备的丰盛午宴。在轻松愉快的氛围中品尝美食，增进感情，分享家庭趣事，让两个家庭更加融洽。</p>
+                                <div class="preparation-tip">💡 准备提示：准备敬酒词，适量饮酒</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                        </div>
+
+                        <div class="story-item current">
+                            <div class="story-date">14:15-14:45</div>
+                            <div class="story-content">
+                                <h3>茶话时光</h3>
+                                <p>餐后的轻松时光，大家可以继续聊天交流，分享对新人的祝福和期望。这是增进两家感情、规划未来的美好时刻。</p>
+                                <div class="preparation-tip">💡 准备提示：准备话题，营造温馨氛围</div>
+                            </div>
+                            <div class="story-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="story-item" data-aos="fade-left">
-                        <div class="story-date">2022年夏天</div>
-                        <div class="story-content">
-                            <h3>热恋时光</h3>
-                            <p>夏日的夜晚，我们一起漫步在海边，聆听着海浪的声音。你的手轻轻握在我的手中，那一刻，时间仿佛静止了。我们分享着彼此的梦想，计划着美好的未来。</p>
-                        </div>
-                        <div class="story-icon">
-                            <i class="fas fa-heart"></i>
-                        </div>
+                    
+                    <div class="scroll-progress">
+                        <div class="scroll-progress-bar" id="scrollProgressBar"></div>
                     </div>
-
-                    <div class="story-item" data-aos="fade-right">
-                        <div class="story-date">2023年秋天</div>
-                        <div class="story-content">
-                            <h3>深情告白</h3>
-                            <p>金桂飘香的秋日，在那棵梧桐树下，我鼓起勇气向你表达了我的爱意。当你含羞地点头答应的那一刻，我的心中充满了无法言喻的喜悦。从此，我们的爱情之花正式绽放。</p>
-                        </div>
-                        <div class="story-icon">
-                            <i class="fas fa-leaf"></i>
-                        </div>
-                    </div>
-
-                    <div class="story-item" data-aos="fade-left">
-                        <div class="story-date">2024年冬天</div>
-                        <div class="story-content">
-                            <h3>求婚时刻</h3>
-                            <p>雪花纷飞的冬日夜晚，我在你最喜欢的那家餐厅里，单膝跪地，向你递上了承载着我满满爱意的戒指。当你泪流满面地说出"我愿意"时，我知道，我是世界上最幸福的人。</p>
-                        </div>
-                        <div class="story-icon">
-                            <i class="fas fa-ring"></i>
-                        </div>
-                    </div>
-
-                    <div class="story-item current" data-aos="zoom-in">
-                        <div class="story-date">2025年秋天</div>
-                        <div class="story-content">
-                            <h3>家人聚首</h3>
-                            <p>在这个收获的季节，我们选择在金星日这个象征爱情的美好日子，与最亲爱的双方父母分享我们的幸福。这是我们爱情故事的新章节，也是两个家庭融合的美好开始。</p>
-                        </div>
-                        <div class="story-icon">
-                            <i class="fas fa-home"></i>
-                        </div>
+                    
+                    <div class="auto-scroll-controls">
+                        <button class="auto-scroll-btn" id="autoScrollBtn">
+                            <i class="fas fa-play"></i>
+                            自动滚动
+                        </button>
+                        <button class="auto-scroll-btn" id="resetScrollBtn">
+                            <i class="fas fa-undo"></i>
+                            重置
+                        </button>
                     </div>
                 </div>
 
                 <div class="story-quote" data-aos="fade-up">
                     <blockquote>
-                        "爱情不是寻找一个完美的人，而是用完美的眼光去欣赏一个不完美的人。"
+                        "两个家庭的融合，不仅是新人的结合，更是爱与传承的延续。让我们共同见证这个美好时刻，为新人祝福！"
                     </blockquote>
-                    <cite>— W & J</cite>
+                    <cite>— 献给所有参与这场订婚宴会的家人</cite>
                 </div>
             </div>
         </section>
 
         <!-- 祝福留言 -->
-        <section class="wishes-section">
+        <section id="wishes-section" class="wishes-section">
+            <!-- 弹幕容器 -->
+            <div class="danmaku-container" id="danmakuContainer"></div>
+            
             <div class="container">
-                <div class="section-header" data-aos="fade-up">
+                <div class="wishes-intro" data-aos="fade-up">
                     <h2 class="section-title">家人祝福</h2>
                     <div class="section-divider">
                         <div class="divider-line"></div>
                         <i class="fas fa-comment-heart divider-icon"></i>
                         <div class="divider-line"></div>
                     </div>
+                    <p class="wishes-subtitle">
+                        您的美好祝愿将化作流星，在这里翩翩流淌✨<br>
+                        与我们一起见证爱情的美好时刻
+                    </p>
                 </div>
 
                 <div class="wishes-container">
                     <div class="wish-form" data-aos="fade-up">
-                        <textarea id="wishText" placeholder="写下对新人的美好祝愿..."></textarea>
+                        <textarea id="wishText" placeholder="写下对新人的美好祝愿，它将化作流星在屏幕上闪耀..."></textarea>
                         <div class="form-footer">
                             <input type="text" id="wishName" placeholder="家人姓名">
                             <button id="submitWish" class="submit-btn">
-                                <i class="fas fa-paper-plane"></i>
-                                留下祝愿
+                                <i class="fas fa-magic"></i>
+                                发送祝福弹幕
                             </button>
                         </div>
-                    </div>
-                    
-                    <div class="wishes-list" id="wishesList">
-                        <!-- 家人祝福将在这里显示 -->
                     </div>
                 </div>
             </div>
         </section>
-    </main>
+            </main>
+    </div>
+
+    <!-- 页面指示器 -->
+    <div class="page-indicators" id="pageIndicators">
+        <!-- 指示器将通过 JavaScript 动态生成 -->
+    </div>
 
     <!-- 页脚 -->
     <footer class="footer">
@@ -421,6 +424,9 @@
 
     <!-- 粒子效果容器 -->
     <div class="particles-container" id="particles"></div>
+    
+    <!-- 花瓣效果容器 -->
+    <div class="petals-container" id="petals"></div>
 
     <script src="script.js"></script>
 </body>
