@@ -1197,62 +1197,64 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     z-index: 1;
 }
 
-/* 自动滚动按钮 */
-.auto-scroll-controls {
+/* 滚动提示 */
+.scroll-tip {
     position: absolute;
-    bottom: 20px;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 15px;
-    z-index: 10;
-}
-
-.auto-scroll-btn {
-    background: var(--gradient-primary);
-    color: var(--white);
-    border: none;
-    padding: 12px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: var(--transition);
-    display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 8px;
-    box-shadow: var(--shadow);
-}
-
-.auto-scroll-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-}
-
-.auto-scroll-btn.active {
-    background: var(--gradient-tertiary);
-    animation: pulse 2s infinite;
-}
-
-.scroll-progress {
-    position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200px;
-    height: 4px;
-    background: rgba(255, 107, 157, 0.2);
-    border-radius: 2px;
-    overflow: hidden;
     z-index: 10;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 107, 157, 0.2);
+    box-shadow: 0 8px 25px rgba(255, 107, 157, 0.15);
 }
 
-.scroll-progress-bar {
-    height: 100%;
-    background: var(--gradient-primary);
-    border-radius: 2px;
-    width: 0%;
-    transition: width 0.3s ease;
+.scroll-tip i:first-child {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+}
+
+.scroll-tip span {
+    color: var(--text-dark);
+    font-weight: 500;
+    white-space: nowrap;
+    font-size: 0.85rem;
+}
+
+.scroll-hint {
+    animation: bounce-down 2s infinite;
+    margin-top: 8px;
+}
+
+.scroll-hint i {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+@keyframes bounce-down {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+        opacity: 0.7;
+    }
+    40% {
+        transform: translateY(8px);
+        opacity: 1;
+    }
+    60% {
+        transform: translateY(4px);
+        opacity: 0.9;
+    }
 }
 
 .story-item {
@@ -1883,6 +1885,29 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
         font-size: 1.3rem;
         margin-bottom: 20px;
         text-align: center;
+    }
+    
+    /* 移动端滚动提示优化 */
+    .scroll-tip {
+        bottom: 20px;
+        padding: 12px 16px;
+        font-size: 0.8rem;
+        border-radius: 15px;
+        max-width: 90%;
+        margin: 0 20px;
+    }
+    
+    .scroll-tip i:first-child {
+        font-size: 1.1rem;
+        margin-bottom: 3px;
+    }
+    
+    .scroll-tip span {
+        font-size: 0.75rem;
+    }
+    
+    .scroll-hint i {
+        font-size: 0.9rem;
     }
     
     /* 移动端按钮样式统一 */

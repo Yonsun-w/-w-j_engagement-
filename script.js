@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initParticles();
     initPetals(); // 花瓣效果
     initScrollAnimations();
-    initStoryAutoScroll(); // 故事自动滚动
+    initStoryTimeline(); // 故事时间线观察
     initDanmaku(); // 弹幕功能
     initMapFunction();
     initPhoneCall();
@@ -185,17 +185,12 @@ function triggerPageChangeEvent(from, to) {
     document.dispatchEvent(event);
 }
 
-// 故事自动滚动功能
-function initStoryAutoScroll() {
+// 故事时间线观察功能
+function initStoryTimeline() {
     const storyTimeline = document.getElementById('storyTimeline');
-    const autoScrollBtn = document.getElementById('autoScrollBtn');
-    const resetScrollBtn = document.getElementById('resetScrollBtn');
-    const progressBar = document.getElementById('scrollProgressBar');
     
     if (!storyTimeline) return;
     
-    let isAutoScrolling = false;
-    let autoScrollInterval;
     const storyItems = storyTimeline.querySelectorAll('.story-item');
     
     // 观察故事项目的可见性
@@ -210,89 +205,10 @@ function initStoryAutoScroll() {
         threshold: 0.3 
     });
     
+    // 观察所有故事项目
     storyItems.forEach(item => {
         storyObserver.observe(item);
     });
-    
-    // 自动滚动按钮
-    autoScrollBtn?.addEventListener('click', () => {
-        if (isAutoScrolling) {
-            stopAutoScroll();
-        } else {
-            startAutoScroll();
-        }
-    });
-    
-    // 重置滚动按钮
-    resetScrollBtn?.addEventListener('click', () => {
-        stopAutoScroll();
-        storyTimeline.scrollTop = 0;
-        updateStoryProgress();
-        // 重置可见性
-        storyItems.forEach(item => {
-            item.classList.remove('visible');
-        });
-    });
-    
-    // 手动滚动时更新进度
-    storyTimeline.addEventListener('scroll', () => {
-        updateStoryProgress();
-        if (isAutoScrolling) {
-            // 如果用户手动滚动，停止自动滚动
-            stopAutoScroll();
-        }
-    });
-    
-    function startAutoScroll() {
-        isAutoScrolling = true;
-        autoScrollBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停滚动';
-        autoScrollBtn.classList.add('active');
-        
-        const scrollHeight = storyTimeline.scrollHeight - storyTimeline.clientHeight;
-        const duration = 10000; // 10秒滚动完成
-        const startTime = Date.now();
-        const startScrollTop = storyTimeline.scrollTop;
-        
-        function animateScroll() {
-            if (!isAutoScrolling) return;
-            
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const easeProgress = easeInOutQuad(progress);
-            
-            storyTimeline.scrollTop = startScrollTop + (scrollHeight - startScrollTop) * easeProgress;
-            updateStoryProgress();
-            
-            if (progress < 1) {
-                requestAnimationFrame(animateScroll);
-            } else {
-                stopAutoScroll();
-            }
-        }
-        
-        requestAnimationFrame(animateScroll);
-    }
-    
-    function stopAutoScroll() {
-        isAutoScrolling = false;
-        autoScrollBtn.innerHTML = '<i class="fas fa-play"></i> 自动滚动';
-        autoScrollBtn.classList.remove('active');
-    }
-    
-    function updateStoryProgress() {
-        if (!progressBar) return;
-        const scrollHeight = storyTimeline.scrollHeight - storyTimeline.clientHeight;
-        const progress = scrollHeight > 0 ? (storyTimeline.scrollTop / scrollHeight) * 100 : 0;
-        progressBar.style.width = progress + '%';
-    }
-    
-    // 缓动函数
-    function easeInOutQuad(t) {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-    }
-    
-    // 初始化进度
-    updateStoryProgress();
 }
 
 // 弹幕功能
@@ -309,7 +225,6 @@ function initDanmaku() {
         "愿你们的爱情像美酒一样，越久越香醇 🍷",
         "祝福你们永远幸福美满！✨",
         "愿你们白头偕老，恩爱如初 👫",
-        "祝新人新婚快乐，早生贵子！👶",
         "愿你们的婚姻充满欢声笑语 😄",
         "祝愿你们相亲相爱一辈子！❤️",
         "愿你们的爱情故事永远美丽 📖",
