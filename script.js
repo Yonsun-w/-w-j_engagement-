@@ -233,39 +233,55 @@ function initDanmaku() {
     ];
     
     // 启动弹幕
-    function startDanmaku() {
-        // 从本地存储加载祝福
-        const savedWishes = getWishes();
-        danmakuQueue = [...defaultWishes];
-        
-        // 添加用户祝福
-        if (savedWishes.length > 0) {
-            savedWishes.forEach(wish => {
-                danmakuQueue.push(`${wish.content} —— ${wish.name}`);
-            });
+    async function startDanmaku() {
+        try {
+            // 从OSS或本地存储加载祝福
+            const savedWishes = await getWishes();
+            danmakuQueue = [...defaultWishes];
+            
+            // 添加用户祝福
+            if (savedWishes && savedWishes.length > 0) {
+                savedWishes.forEach(wish => {
+                    danmakuQueue.push(wish.content);
+                });
+                console.log(`加载了${savedWishes.length}条用户祝福到弹幕队列`);
+            }
+            
+            // 随机打乱
+            danmakuQueue = shuffleArray(danmakuQueue);
+            
+            // 开始显示弹幕
+            danmakuInterval = setInterval(createDanmaku, 2000);
+            
+            // 立即显示第一个
+            createDanmaku();
+        } catch (error) {
+            console.error('启动弹幕失败:', error);
+            // 如果加载失败，至少显示默认祝福
+            danmakuQueue = [...defaultWishes];
+            danmakuInterval = setInterval(createDanmaku, 2000);
+            createDanmaku();
         }
-        
-        // 随机打乱
-        danmakuQueue = shuffleArray(danmakuQueue);
-        
-        // 开始显示弹幕
-        danmakuInterval = setInterval(createDanmaku, 2000);
-        
-        // 立即显示第一个
-        createDanmaku();
     }
     
-    function createDanmaku() {
+    async function createDanmaku() {
         if (danmakuQueue.length === 0) {
-            // 重新填充队列
-            danmakuQueue = [...defaultWishes];
-            const savedWishes = getWishes();
-            if (savedWishes.length > 0) {
-                savedWishes.forEach(wish => {
-                    danmakuQueue.push(`${wish.content} —— ${wish.name}`);
-                });
+            try {
+                // 重新填充队列
+                danmakuQueue = [...defaultWishes];
+                const savedWishes = await getWishes();
+                if (savedWishes && savedWishes.length > 0) {
+                    savedWishes.forEach(wish => {
+                        danmakuQueue.push(wish.content);
+                    });
+                }
+                danmakuQueue = shuffleArray(danmakuQueue);
+            } catch (error) {
+                console.error('重新加载祝福失败:', error);
+                // 如果失败，只使用默认祝福
+                danmakuQueue = [...defaultWishes];
+                danmakuQueue = shuffleArray(danmakuQueue);
             }
-            danmakuQueue = shuffleArray(danmakuQueue);
         }
         
         const wish = danmakuQueue.pop();
@@ -529,28 +545,43 @@ function initPhotoDisplay() {
 // 祝福留言功能
 function initWishes() {
     const wishText = document.getElementById('wishText');
-    const wishName = document.getElementById('wishName');
     const submitBtn = document.getElementById('submitWish');
     
-    if (!wishText || !wishName || !submitBtn) return;
+    if (!wishText || !submitBtn) return;
     
     // 提交祝福
-    submitBtn.addEventListener('click', () => {
+    submitBtn.addEventListener('click', async () => {
         const text = wishText.value.trim();
-        const name = wishName.value.trim();
         
-        if (text && name) {
-            addWish(name, text);
+        if (!text) {
+            showNotification('请填写祝福内容 😊');
+            return;
+        }
+        
+        try {
+            // 禁用按钮防止重复提交
+            submitBtn.disabled = true;
+            submitBtn.textContent = '发送中...';
+            
+            // 保存祝福
+            await addWish(text);
+            
+            // 清空表单
             wishText.value = '';
-            wishName.value = '';
             
             // 提交成功提示
             showNotification('祝愿已发送！您的祝福将出现在弹幕中 🎉');
             
             // 立即添加到弹幕
-            addDanmakuWish(`${text} —— ${name}`);
-        } else {
-            showNotification('请填写完整的祝福内容和家人姓名');
+            addDanmakuWish(text);
+            
+        } catch (error) {
+            console.error('提交祝福失败:', error);
+            showNotification('发送失败，请稍后重试 😟');
+        } finally {
+            // 恢复按钮状态
+            submitBtn.disabled = false;
+            submitBtn.textContent = '发送祝福弹幕';
         }
     });
     
@@ -562,17 +593,37 @@ function initWishes() {
     });
 }
 
-function addWish(name, content) {
-    const wishes = getWishes();
-    const newWish = {
-        id: Date.now(),
-        name: name,
-        content: content,
-        date: new Date().toLocaleDateString('zh-CN')
-    };
-    
-    wishes.unshift(newWish);
-    saveWishes(wishes);
+async function addWish(content) {
+    try {
+        // 显示加载状态
+        showNotification('正在保存祝福...');
+        
+        // 如果使用了OSS管理器
+        if (window.wishesManager) {
+            const newWish = await window.wishesManager.addWish(content);
+            showNotification('祝福保存成功！💕');
+            return newWish;
+        }
+        
+        // 降级到本地存储
+        const wishes = await getWishes();
+        const newWish = {
+            id: Date.now(),
+            content: content,
+            date: new Date().toLocaleDateString('zh-CN'),
+            timestamp: new Date().toISOString()
+        };
+        
+        wishes.unshift(newWish);
+        await saveWishes(wishes);
+        showNotification('祝福保存成功！💕');
+        return newWish;
+        
+    } catch (error) {
+        console.error('保存祝福失败:', error);
+        showNotification('保存失败，请稍后重试 😟');
+        throw error;
+    }
 }
 
 function addDanmakuWish(wishText) {
@@ -597,13 +648,40 @@ function addDanmakuWish(wishText) {
     }, 20000);
 }
 
-function getWishes() {
-    const saved = localStorage.getItem('familyWishes');
-    return saved ? JSON.parse(saved) : [];
+async function getWishes() {
+    try {
+        // 如果使用了OSS管理器
+        if (window.wishesManager) {
+            return await window.wishesManager.getWishes();
+        }
+        
+        // 降级到本地存储
+        const saved = localStorage.getItem('familyWishes');
+        return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+        console.error('读取祝福失败:', error);
+        // 最终降级到本地存储
+        const saved = localStorage.getItem('familyWishes');
+        return saved ? JSON.parse(saved) : [];
+    }
 }
 
-function saveWishes(wishes) {
-    localStorage.setItem('familyWishes', JSON.stringify(wishes));
+async function saveWishes(wishes) {
+    try {
+        // 如果使用了OSS管理器
+        if (window.wishesManager) {
+            return await window.wishesManager.saveWishes(wishes);
+        }
+        
+        // 降级到本地存储
+        localStorage.setItem('familyWishes', JSON.stringify(wishes));
+        return true;
+    } catch (error) {
+        console.error('保存祝福失败:', error);
+        // 最终降级到本地存储
+        localStorage.setItem('familyWishes', JSON.stringify(wishes));
+        return false;
+    }
 }
 
 // 通知提示

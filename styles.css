@@ -1623,25 +1623,7 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     border-color: var(--primary-color);
 }
 
-.form-footer {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-#wishName {
-    flex: 1;
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    border-radius: 25px;
-    font-family: inherit;
-    transition: var(--transition);
-}
-
-#wishName:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
+/* 祝福表单样式已简化 */
 
 .submit-btn {
     background: var(--gradient-primary);

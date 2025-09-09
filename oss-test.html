@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSS祝福板测试页面</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .status.success { background: #d4edda; color: #155724; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .wish-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+        
+        .wish-meta {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌐 OSS网络祝福板测试</h1>
+    
+    <!-- 连接状态 -->
+    <div class="card">
+        <h3>连接状态</h3>
+        <div id="connection-status" class="status">检查中...</div>
+        <button onclick="checkConnection()">重新检测</button>
+    </div>
+    
+    <!-- 配置信息 -->
+    <div class="card">
+        <h3>当前配置</h3>
+        <pre id="config-info">加载中...</pre>
+    </div>
+    
+    <!-- 测试祝福提交 -->
+    <div class="card">
+        <h3>测试祝福提交</h3>
+        <div class="form-group">
+            <label for="test-name">姓名:</label>
+            <input type="text" id="test-name" placeholder="请输入姓名" value="测试用户">
+        </div>
+        <div class="form-group">
+            <label for="test-content">祝福内容:</label>
+            <textarea id="test-content" placeholder="请输入祝福内容" rows="3">这是一条OSS测试祝福！</textarea>
+        </div>
+        <button onclick="submitTestWish()" id="submit-btn">提交测试祝福</button>
+    </div>
+    
+    <!-- 统计信息 -->
+    <div class="card">
+        <h3>祝福统计</h3>
+        <div class="stats" id="stats-container">
+            <div class="stat-item">
+                <div class="stat-number" id="total-wishes">-</div>
+                <div class="stat-label">总祝福数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="today-wishes">-</div>
+                <div class="stat-label">今日新增</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="unique-users">-</div>
+                <div class="stat-label">独立用户</div>
+            </div>
+        </div>
+        <button onclick="refreshStats()">刷新统计</button>
+    </div>
+    
+    <!-- 祝福列表 -->
+    <div class="card">
+        <h3>最新祝福 <button onclick="loadWishes()" style="width: auto; float: right; padding: 5px 15px; margin: 0;">刷新</button></h3>
+        <div id="wishes-list">加载中...</div>
+    </div>
+    
+    <!-- 操作日志 -->
+    <div class="card">
+        <h3>操作日志</h3>
+        <pre id="log-output"></pre>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/ali-oss@6.18.1/dist/aliyun-oss-sdk.min.js"></script>
+    <script src="oss-config.js"></script>
+    <script src="wishes-oss.js"></script>
+    
+    <script>
+        // 日志功能
+        function log(message) {
+            const timestamp = new Date().toLocaleString('zh-CN');
+            const logOutput = document.getElementById('log-output');
+            logOutput.textContent += `[${timestamp}] ${message}\n`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('log-output').textContent = '';
+        }
+        
+        // 检查连接状态
+        async function checkConnection() {
+            const statusElement = document.getElementById('connection-status');
+            statusElement.textContent = '检查中...';
+            statusElement.className = 'status';
+            
+            try {
+                if (window.wishesManager && window.wishesManager.isInitialized) {
+                    const stats = await window.getWishesStats();
+                    statusElement.textContent = `✅ OSS连接正常 (${stats.total}条祝福)`;
+                    statusElement.className = 'status success';
+                    log('OSS连接测试成功');
+                } else {
+                    statusElement.textContent = '⚠️ 使用本地存储模式';
+                    statusElement.className = 'status warning';
+                    log('OSS未初始化，使用本地存储');
+                }
+            } catch (error) {
+                statusElement.textContent = `❌ 连接失败: ${error.message}`;
+                statusElement.className = 'status error';
+                log(`连接测试失败: ${error.message}`);
+            }
+        }
+        
+        // 显示配置信息
+        function showConfig() {
+            const config = {
+                region: OSS_CONFIG.region,
+                bucket: OSS_CONFIG.bucket,
+                endpoint: OSS_CONFIG.endpoint,
+                wishesFile: OSS_CONFIG.wishesFile,
+                hasCredentials: !!(OSS_CONFIG.accessKeyId || process?.env?.OSS_ACCESS_KEY_ID),
+                timeout: OSS_CONFIG.timeout,
+                maxRetries: OSS_CONFIG.maxRetries
+            };
+            
+            document.getElementById('config-info').textContent = JSON.stringify(config, null, 2);
+        }
+        
+        // 提交测试祝福
+        async function submitTestWish() {
+            const name = document.getElementById('test-name').value.trim();
+            const content = document.getElementById('test-content').value.trim();
+            const submitBtn = document.getElementById('submit-btn');
+            
+            if (!name || !content) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '提交中...';
+                
+                log(`开始提交祝福: ${name} - ${content}`);
+                
+                if (window.addWish) {
+                    await window.addWish(name, content);
+                    log('祝福提交成功！');
+                    
+                    // 刷新数据
+                    await Promise.all([refreshStats(), loadWishes()]);
+                    
+                    // 清空表单
+                    document.getElementById('test-content').value = '';
+                } else {
+                    throw new Error('addWish函数不可用');
+                }
+                
+            } catch (error) {
+                log(`祝福提交失败: ${error.message}`);
+                alert(`提交失败: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交测试祝福';
+            }
+        }
+        
+        // 刷新统计信息
+        async function refreshStats() {
+            try {
+                if (window.getWishesStats) {
+                    const stats = await window.getWishesStats();
+                    document.getElementById('total-wishes').textContent = stats.total || 0;
+                    document.getElementById('today-wishes').textContent = stats.todayCount || 0;
+                    document.getElementById('unique-users').textContent = stats.uniqueUsers || 0;
+                    log(`统计信息已更新: ${stats.total}条祝福`);
+                }
+            } catch (error) {
+                log(`获取统计信息失败: ${error.message}`);
+            }
+        }
+        
+        // 加载祝福列表
+        async function loadWishes() {
+            const listElement = document.getElementById('wishes-list');
+            listElement.innerHTML = '加载中...';
+            
+            try {
+                const wishes = await window.getWishes();
+                
+                if (wishes && wishes.length > 0) {
+                    listElement.innerHTML = wishes.slice(0, 10).map(wish => `
+                        <div class="wish-item">
+                            <strong>${wish.name}</strong>: ${wish.content}
+                            <div class="wish-meta">
+                                ${wish.date} ${wish.timestamp ? new Date(wish.timestamp).toLocaleTimeString('zh-CN') : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                    log(`加载了${wishes.length}条祝福`);
+                } else {
+                    listElement.innerHTML = '<p>暂无祝福</p>';
+                    log('暂无祝福数据');
+                }
+            } catch (error) {
+                listElement.innerHTML = `<p>加载失败: ${error.message}</p>`;
+                log(`加载祝福失败: ${error.message}`);
+            }
+        }
+        
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            log('OSS测试页面初始化开始');
+            
+            showConfig();
+            
+            // 等待系统初始化
+            setTimeout(async () => {
+                await checkConnection();
+                await refreshStats();
+                await loadWishes();
+                log('页面初始化完成');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

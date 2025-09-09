@@ -121,7 +121,7 @@
                                     <i class="fas fa-map-marker-alt"></i>
                                     <div class="detail-content">
                                         <h4>郑州市楚境餐厅（省政府店）</h4>
-                                        <p>环境优雅，景色宜人，适合家庭聚会</p>
+                                        <p>黄河南路正光路交叉口向东100米路北</p>
                                         <div class="location-actions">
                                             <button class="map-btn primary" id="mapBtn">
                                                 <i class="fas fa-directions"></i>
@@ -135,13 +135,6 @@
                                     </div>
                                 </div>
                                 
-                                <div class="detail-item">
-                                    <i class="fas fa-users"></i>
-                                    <div class="detail-content">
-                                        <h4>亲密家庭聚会</h4>
-                                        <p>双方父母及亲密家人，一起分享这个特殊时刻</p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -383,13 +376,10 @@
                 <div class="wishes-container">
                     <div class="wish-form" data-aos="fade-up">
                         <textarea id="wishText" placeholder="写下对新人的美好祝愿，它将化作流星在屏幕上闪耀..."></textarea>
-                        <div class="form-footer">
-                            <input type="text" id="wishName" placeholder="家人姓名">
-                            <button id="submitWish" class="submit-btn">
-                                <i class="fas fa-magic"></i>
-                                发送祝福弹幕
-                            </button>
-                        </div>
+                        <button id="submitWish" class="submit-btn">
+                            <i class="fas fa-magic"></i>
+                            发送祝福弹幕
+                        </button>
                     </div>
                 </div>
             </div>
@@ -421,7 +411,66 @@
     <!-- 花瓣效果容器 -->
     <div class="petals-container" id="petals"></div>
 
+    <!-- 阿里云OSS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/ali-oss@6.18.1/dist/aliyun-oss-sdk.min.js"></script>
+    
+    <!-- OSS配置和祝福管理 -->
+    <script src="oss-config.js"></script>
+    <script src="wishes-oss.js"></script>
+    
+    <!-- 主脚本 -->
     <script src="script.js"></script>
+    
+    <!-- OSS连接状态指示 -->
+    <div id="oss-status" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; z-index: 9999; display: none;">
+        <span id="oss-status-text">网络祝福板连接中...</span>
+    </div>
+    
+    <script>
+        // OSS状态显示
+        document.addEventListener('DOMContentLoaded', async () => {
+            const statusElement = document.getElementById('oss-status');
+            const statusText = document.getElementById('oss-status-text');
+            
+            // 显示连接状态
+            statusElement.style.display = 'block';
+            
+            // 等待OSS初始化
+            setTimeout(async () => {
+                try {
+                    if (window.wishesManager && window.wishesManager.isInitialized) {
+                        const stats = await window.getWishesStats();
+                        statusText.textContent = `网络祝福板已连接 (${stats.total}条祝福)`;
+                        statusElement.style.background = 'rgba(76, 175, 80, 0.8)'; // 绿色
+                        
+                        // 3秒后隐藏
+                        setTimeout(() => {
+                            statusElement.style.opacity = '0';
+                            setTimeout(() => statusElement.style.display = 'none', 300);
+                        }, 3000);
+                    } else {
+                        statusText.textContent = '使用本地祝福板';
+                        statusElement.style.background = 'rgba(255, 193, 7, 0.8)'; // 橙色
+                        
+                        // 5秒后隐藏
+                        setTimeout(() => {
+                            statusElement.style.opacity = '0';
+                            setTimeout(() => statusElement.style.display = 'none', 300);
+                        }, 5000);
+                    }
+                } catch (error) {
+                    statusText.textContent = '祝福板连接失败';
+                    statusElement.style.background = 'rgba(244, 67, 54, 0.8)'; // 红色
+                    
+                    // 10秒后隐藏
+                    setTimeout(() => {
+                        statusElement.style.opacity = '0';
+                        setTimeout(() => statusElement.style.display = 'none', 300);
+                    }, 10000);
+                }
+            }, 2000);
+        });
+    </script>
 </body>
 </html>
 
