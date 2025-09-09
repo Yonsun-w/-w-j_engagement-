@@ -1402,29 +1402,32 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
 
 /* 弹幕容器 */
 .danmaku-container {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 2;
+    z-index: 1100;
 }
 
 .danmaku-item {
     position: absolute;
     color: var(--white);
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    font-weight: 600;
     white-space: nowrap;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7), 0 0 10px rgba(255, 107, 157, 0.3);
     animation: danmaku-flow 15s linear infinite;
     pointer-events: none;
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 @keyframes danmaku-flow {
@@ -1438,18 +1441,24 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
 
 /* 不同颜色的弹幕 */
 .danmaku-item:nth-child(3n+1) {
-    color: #FFE4E1;
-    background: rgba(255, 182, 193, 0.2);
+    color: #FFB6C1;
+    background: rgba(255, 182, 193, 0.25);
+    border-color: rgba(255, 182, 193, 0.4);
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 182, 193, 0.5);
 }
 
 .danmaku-item:nth-child(3n+2) {
-    color: #F0F8FF;
-    background: rgba(173, 216, 230, 0.2);
+    color: #87CEEB;
+    background: rgba(135, 206, 235, 0.25);
+    border-color: rgba(135, 206, 235, 0.4);
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7), 0 0 15px rgba(135, 206, 235, 0.5);
 }
 
 .danmaku-item:nth-child(3n+3) {
-    color: #F5FFFA;
-    background: rgba(152, 251, 152, 0.2);
+    color: #98FB98;
+    background: rgba(152, 251, 152, 0.25);
+    border-color: rgba(152, 251, 152, 0.4);
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7), 0 0 15px rgba(152, 251, 152, 0.5);
 }
 
 /* 弹幕速度变化 */
@@ -1466,19 +1475,53 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
 
 /* 特殊弹幕效果 */
 .danmaku-item.special {
-    background: linear-gradient(45deg, rgba(255, 107, 157, 0.3), rgba(255, 192, 203, 0.3));
-    box-shadow: 0 0 20px rgba(255, 107, 157, 0.4);
+    background: linear-gradient(45deg, rgba(255, 107, 157, 0.4), rgba(255, 192, 203, 0.4));
+    border: 2px solid rgba(255, 107, 157, 0.6);
+    color: #FFD700;
+    font-weight: 700;
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    box-shadow: 
+        0 0 20px rgba(255, 107, 157, 0.6), 
+        0 4px 15px rgba(255, 107, 157, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    text-shadow: 
+        2px 2px 6px rgba(0, 0, 0, 0.8), 
+        0 0 15px rgba(255, 215, 0, 0.8),
+        0 0 25px rgba(255, 107, 157, 0.5);
     animation: danmaku-glow 15s linear infinite;
 }
 
 @keyframes danmaku-glow {
-    0%, 100% {
+    0% {
         transform: translateX(100vw);
-        box-shadow: 0 0 20px rgba(255, 107, 157, 0.4);
+        box-shadow: 
+            0 0 20px rgba(255, 107, 157, 0.6), 
+            0 4px 15px rgba(255, 107, 157, 0.3);
+    }
+    25% {
+        transform: translateX(75vw);
+        box-shadow: 
+            0 0 30px rgba(255, 107, 157, 0.8), 
+            0 4px 20px rgba(255, 107, 157, 0.4);
     }
     50% {
         transform: translateX(50vw);
-        box-shadow: 0 0 30px rgba(255, 107, 157, 0.6);
+        box-shadow: 
+            0 0 40px rgba(255, 107, 157, 1), 
+            0 4px 25px rgba(255, 107, 157, 0.5),
+            0 0 60px rgba(255, 215, 0, 0.6);
+    }
+    75% {
+        transform: translateX(25vw);
+        box-shadow: 
+            0 0 30px rgba(255, 107, 157, 0.8), 
+            0 4px 20px rgba(255, 107, 157, 0.4);
+    }
+    100% {
+        transform: translateX(-100%);
+        box-shadow: 
+            0 0 20px rgba(255, 107, 157, 0.6), 
+            0 4px 15px rgba(255, 107, 157, 0.3);
     }
 }
 
