@@ -138,10 +138,6 @@
     <div class="card">
         <h3>测试祝福提交</h3>
         <div class="form-group">
-            <label for="test-name">姓名:</label>
-            <input type="text" id="test-name" placeholder="请输入姓名" value="测试用户">
-        </div>
-        <div class="form-group">
             <label for="test-content">祝福内容:</label>
             <textarea id="test-content" placeholder="请输入祝福内容" rows="3">这是一条OSS测试祝福！</textarea>
         </div>
@@ -161,8 +157,8 @@
                 <div class="stat-label">今日新增</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" id="unique-users">-</div>
-                <div class="stat-label">独立用户</div>
+                <div class="stat-number" id="unique-wishes">-</div>
+                <div class="stat-label">独特祝福</div>
             </div>
         </div>
         <button onclick="refreshStats()">刷新统计</button>
@@ -241,12 +237,11 @@
         
         // 提交测试祝福
         async function submitTestWish() {
-            const name = document.getElementById('test-name').value.trim();
             const content = document.getElementById('test-content').value.trim();
             const submitBtn = document.getElementById('submit-btn');
             
-            if (!name || !content) {
-                alert('请填写完整信息');
+            if (!content) {
+                alert('请填写祝福内容');
                 return;
             }
             
@@ -254,10 +249,10 @@
                 submitBtn.disabled = true;
                 submitBtn.textContent = '提交中...';
                 
-                log(`开始提交祝福: ${name} - ${content}`);
+                log(`开始提交祝福: ${content}`);
                 
                 if (window.addWish) {
-                    await window.addWish(name, content);
+                    await window.addWish(content);
                     log('祝福提交成功！');
                     
                     // 刷新数据
@@ -285,7 +280,7 @@
                     const stats = await window.getWishesStats();
                     document.getElementById('total-wishes').textContent = stats.total || 0;
                     document.getElementById('today-wishes').textContent = stats.todayCount || 0;
-                    document.getElementById('unique-users').textContent = stats.uniqueUsers || 0;
+                    document.getElementById('unique-wishes').textContent = stats.uniqueWishes || 0;
                     log(`统计信息已更新: ${stats.total}条祝福`);
                 }
             } catch (error) {
@@ -304,7 +299,7 @@
                 if (wishes && wishes.length > 0) {
                     listElement.innerHTML = wishes.slice(0, 10).map(wish => `
                         <div class="wish-item">
-                            <strong>${wish.name}</strong>: ${wish.content}
+                            <strong>${wish.content}</strong>
                             <div class="wish-meta">
                                 ${wish.date} ${wish.timestamp ? new Date(wish.timestamp).toLocaleTimeString('zh-CN') : ''}
                             </div>

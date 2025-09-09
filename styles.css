@@ -1629,13 +1629,19 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     background: var(--gradient-primary);
     color: var(--white);
     border: none;
-    padding: 12px 25px;
+    padding: 15px 30px;
     border-radius: 25px;
     cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
     transition: var(--transition);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 20px;
+    box-shadow: var(--shadow);
 }
 
 .submit-btn:hover {
@@ -2277,13 +2283,7 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
         font-size: clamp(1.2rem, 4vw, 1.8rem);
     }
     
-    .form-footer {
-        flex-direction: column;
-    }
-    
-    #wishName {
-        width: 100%;
-    }
+    /* 移动端祝福表单样式已简化 */
     
     
     .timeline-item {
