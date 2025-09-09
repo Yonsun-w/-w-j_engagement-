@@ -690,7 +690,10 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     width: 100%;
     height: 300px;
     object-fit: cover;
+    object-position: center;
     transition: transform 0.3s ease;
+    display: block;
+    border-radius: 20px;
 }
 
 .main-image:hover img {
@@ -714,7 +717,10 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     width: 100%;
     height: 140px;
     object-fit: cover;
+    object-position: center;
     transition: transform 0.3s ease;
+    display: block;
+    border-radius: 15px;
 }
 
 .side-image:hover img {
@@ -792,19 +798,32 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
 @media (max-width: 768px) {
     .restaurant-images {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 20px;
+        height: auto;
+    }
+    
+    .main-image {
+        margin-bottom: 10px;
     }
     
     .main-image img {
-        height: 250px;
+        height: 280px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 15px;
     }
     
     .side-images {
-        flex-direction: row;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
     }
     
     .side-image img {
-        height: 120px;
+        height: 180px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 12px;
     }
     
     .gallery-grid {
@@ -2162,23 +2181,44 @@ section:not(.fullscreen-section):not(.hero):not(.restaurant-section):not(.story-
     }
     
     .restaurant-images {
-        height: 200px;
-        grid-template-columns: 1fr;
         gap: 15px;
+        height: auto;
     }
     
     .main-image img {
-        height: 200px;
+        height: 220px;
+        border-radius: 12px;
     }
     
     .side-images {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
     
     .side-image img {
-        height: 80px;
+        height: 140px;
+        border-radius: 10px;
+        object-position: center;
+    }
+    
+    /* 极小屏幕优化 */
+    @media (max-width: 360px) {
+        .main-image img {
+            height: 180px;
+        }
+        
+        .side-image img {
+            height: 120px;
+        }
+        
+        .restaurant-images {
+            gap: 12px;
+        }
+        
+        .side-images {
+            gap: 8px;
+        }
     }
     
     .restaurant-info {
