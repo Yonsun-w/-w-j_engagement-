@@ -842,10 +842,9 @@ function openBaiduMap() {
     
     // 检测设备类型
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isAndroid = /Android/.test(navigator.userAgent);
+    const isWechat = /MicroMessenger/i.test(navigator.userAgent);
     
-    // 百度地图网页版直链（用户提供的准确链接）
+    // 百度地图网页版链接
     const baiduWebUrl = `https://map.baidu.com/poi/%E6%A5%9A%E5%A2%83%E9%A4%90%E5%8E%85(%E7%9C%81%E6%94%BF%E5%BA%9C%E5%BA%97)/@12663006.531564746,4108577.489719764,19z?uid=b7d23b502bd7f1c38605bf66&ugc_type=3&ugc_ver=1&device_ratio=2&compat=1&pcevaname=pc4.1&querytype=detailConInfo&da_src=shareurl`;
     
     if (!isMobile) {
@@ -855,105 +854,91 @@ function openBaiduMap() {
         return;
     }
     
-    // 移动端优先尝试拉起App
-    let appOpened = false;
-    
-    // 不同平台的App URL Schemes
-    const appUrls = [];
-    
-    if (isIOS) {
-        // iOS百度地图URL Schemes
-        appUrls.push(
-            `baidumap://map/marker?location=${latitude},${longitude}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(address)}&src=webapp`,
-            `bdmap://map/marker?location=${latitude},${longitude}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(address)}`
-        );
+    if (isWechat) {
+        // 微信内置浏览器直接打开网页版
+        window.location.href = baiduWebUrl;
+        showNotification('正在为您打开百度地图 🗺️');
+        return;
     }
     
-    if (isAndroid) {
-        // Android百度地图URL Schemes
-        appUrls.push(
-            `bdapp://map/marker?location=${latitude},${longitude}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(address)}&src=webapp`,
-            `baidumap://map/marker?location=${latitude},${longitude}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(address)}&src=webapp`
-        );
-    }
-    
-    // 通用URL Scheme
-    appUrls.push(
+    // 移动端：尝试多种方式拉起地图App
+    const appUrls = [
+        // 百度地图App URL schemes
+        `baidumap://map/place/detail?uid=b7d23b502bd7f1c38605bf66&src=webapp`,
+        `bdapp://map/place/detail?uid=b7d23b502bd7f1c38605bf66`,
+        
+        // 通用地图 schemes
         `geo:${latitude},${longitude}?q=${encodeURIComponent(title)}`,
-        `maps://maps.google.com/maps?q=${latitude},${longitude}(${encodeURIComponent(title)})`
-    );
+        `maps://maps.google.com/maps?q=${latitude},${longitude}`,
+        
+        // 高德地图作为备选
+        `iosamap://poi?sourceApplication=webapp&pid=&appname=webapp&mid=&lat=${latitude}&lon=${longitude}&pname=${encodeURIComponent(title)}`
+    ];
     
-    // 尝试打开App的函数
-    const tryOpenApp = (urlIndex = 0) => {
-        if (urlIndex >= appUrls.length) {
-            // 所有App尝试都失败，打开网页版
-            window.open(baiduWebUrl, '_blank');
-            showNotification('正在为您打开百度地图网页版 🗺️');
+    let appLaunched = false;
+    let attemptIndex = 0;
+    
+    function tryLaunchApp() {
+        if (attemptIndex >= appUrls.length || appLaunched) {
+            // 所有尝试都失败，打开网页版
+            if (!appLaunched) {
+                window.open(baiduWebUrl, '_blank');
+                showNotification('正在为您打开百度地图网页版 🗺️');
+            }
             return;
         }
         
-        const appUrl = appUrls[urlIndex];
+        const currentUrl = appUrls[attemptIndex];
+        attemptIndex++;
         
-        try {
-            // 创建隐藏的iframe尝试打开App
-            const iframe = document.createElement('iframe');
-            iframe.style.cssText = 'display:none;position:absolute;left:-9999px;width:1px;height:1px;';
-            iframe.src = appUrl;
-            document.body.appendChild(iframe);
-            
-            // 设置较短的超时时间
-            const timeout = setTimeout(() => {
-                // 清理iframe
-                if (document.body.contains(iframe)) {
-                    document.body.removeChild(iframe);
-                }
-                
-                if (!appOpened) {
-                    // 尝试下一个URL
-                    tryOpenApp(urlIndex + 1);
-                }
-            }, 1000);
-            
-            // 监听页面失焦，表示App可能已打开
-            const handleBlur = () => {
-                clearTimeout(timeout);
-                appOpened = true;
-                
-                // 清理iframe
-                if (document.body.contains(iframe)) {
-                    document.body.removeChild(iframe);
-                }
-                
+        // 创建隐藏链接尝试拉起App
+        const link = document.createElement('a');
+        link.href = currentUrl;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        
+        // 监听页面可见性变化，判断是否成功拉起App
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                appLaunched = true;
                 showNotification('正在为您打开地图App 📱');
-                window.removeEventListener('blur', handleBlur);
-            };
-            
-            window.addEventListener('blur', handleBlur, { once: true });
-            
-            // 备用清理
-            setTimeout(() => {
-                if (document.body.contains(iframe)) {
-                    document.body.removeChild(iframe);
-                }
-                window.removeEventListener('blur', handleBlur);
-            }, 100);
-            
-        } catch (error) {
-            console.log('尝试打开App失败:', error);
-            tryOpenApp(urlIndex + 1);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+                document.body.removeChild(link);
+            }
+        };
+        
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // 尝试点击链接
+        try {
+            link.click();
+        } catch (e) {
+            console.log('App launch attempt failed:', e);
         }
-    };
+        
+        // 短暂延迟后清理并尝试下一个
+        setTimeout(() => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            if (document.body.contains(link)) {
+                document.body.removeChild(link);
+            }
+            
+            if (!appLaunched) {
+                tryLaunchApp();
+            }
+        }, 800);
+    }
     
-    // 开始尝试打开App
-    tryOpenApp();
+    // 开始尝试
+    tryLaunchApp();
     
-    // 兜底方案：2.5秒后如果没有成功打开App，直接打开网页版
+    // 兜底：2秒后如果都没成功，直接打开网页版
     setTimeout(() => {
-        if (!appOpened) {
+        if (!appLaunched) {
             window.open(baiduWebUrl, '_blank');
             showNotification('正在为您打开百度地图网页版 🗺️');
         }
-    }, 2500);
+    }, 2000);
 }
 
 // 错误处理
